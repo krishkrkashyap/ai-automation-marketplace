@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ industry.name }} AI Automation | Custom Bots for {{ industry.name }}{% endblock %}
+
+{% block meta_description %}Transform your {{ industry.name }} operations with AI automation. Discover custom bots for {{ industry.name|lower }} industry. Streamline processes, reduce costs, and scale with AI-powered solutions.{% endblock %}
+
+{% block seo %}
+<meta property="og:title" content="{{ industry.name }} AI Automation | Custom Bots & Solutions">
+<meta property="og:description" content="Transform your {{ industry.name }} operations with AI automation. Custom bots, RPA, and intelligent automation solutions.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://example.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Industries", "item": "https://example.com/industries/"},
+    {"@type": "ListItem", "position": 3, "name": "{{ industry.name }}", "item": "https://example.com/industries/{{ slug }}/"}
+  ]
+}
+</script>
+
+<!-- Breadcrumb -->
+<nav class="bg-gray-100 dark:bg-gray-800 py-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ol class="flex items-center space-x-2 text-sm" itemscope itemtype="https://schema.org/BreadcrumbList">
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/" itemprop="item" class="text-gray-500 dark:text-gray-400 hover:text-blue-600"><span itemprop="name">Home</span></a><meta itemprop="position" content="1"></li>
+            <li><span class="text-gray-400">/</span></li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/industries/" itemprop="item" class="text-gray-500 dark:text-gray-400 hover:text-blue-600"><span itemprop="name">Industries</span></a><meta itemprop="position" content="2"></li>
+            <li><span class="text-gray-400">/</span></li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><span itemprop="name" class="text-gray-900 dark:text-white">{{ industry.name }}</span><meta itemprop="position" content="3"></li>
+        </ol>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 dark:from-blue-950 dark:via-blue-900 dark:to-indigo-950 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center mb-4">
+            <span class="text-5xl mr-4">{{ industry.icon }}</span>
+            <h1 class="text-4xl md:text-5xl font-bold">{{ industry.name }} AI Automation</h1>
+        </div>
+        <p class="text-xl text-blue-100 max-w-3xl">{{ industry.description }}</p>
+        <div class="flex flex-col sm:flex-row gap-4 mt-6">
+            <a href="/contact/" class="bg-white text-blue-900 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition inline-block">Get a Free Consultation</a>
+            <a href="#bots" class="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 transition inline-block">View AI Bots</a>
+        </div>
+    </div>
+</section>
+
+<!-- Industry Overview -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">AI Automation for {{ industry.name }}</h2>
+        <div class="prose max-w-none text-gray-600 dark:text-gray-300">
+            <p>Discover how AI-powered automation can revolutionize your {{ industry.name|lower }} operations. From reducing manual workloads to improving accuracy and scaling your business, our custom AI bots are designed to address your specific challenges.</p>
+            <p>Whether you're looking to automate repetitive tasks, improve customer engagement, or gain predictive insights, we have the right AI solutions for your business.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Problems -->
+<section class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Common Challenges in {{ industry.name }}</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">These problems affect most {{ industry.name|lower }} businesses and can significantly impact efficiency and profitability.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for problem in industry.problems %}
+            <div class="flex items-start p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
+                <i class="fas fa-exclamation-triangle text-red-500 dark:text-red-400 mt-1 mr-3 text-xl"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ problem }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Manual processes consume valuable time and resources</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Solutions -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">AI Automation Solutions for {{ industry.name }}</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">Our AI-powered solutions address these challenges with intelligent automation.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for solution in industry.solutions %}
+            <div class="flex items-start p-6 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900/30">
+                <i class="fas fa-robot text-green-600 dark:text-green-400 mt-1 mr-3 text-xl"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ solution }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">AI-powered automation to streamline your operations</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Related Bots -->
+<section id="bots" class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">AI Bots for {{ industry.name }}</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">Explore our specialized AI bots designed for {{ industry.name|lower }} businesses.</p>
+        
+        {% if industry.bots %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for bot_slug in industry.bots %}
+            <a href="/services/bots/{{ bot_slug }}/" class="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm hover:shadow-lg transition border border-gray-200 dark:border-gray-600">
+                <div class="flex items-center mb-3">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-robot text-blue-600 dark:text-blue-400 text-xl"></i>
+                    </div>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">{{ bot_slug|slugify|title }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Custom AI bot for {{ industry.name|lower }} automation</p>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <a href="/services/bots/" class="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm hover:shadow-lg transition border border-gray-200 dark:border-gray-600 text-center">
+                <i class="fas fa-plus text-blue-600 dark:text-blue-400 text-2xl mb-3"></i>
+                <h3 class="font-semibold text-gray-900 dark:text-white">View All Bots</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Explore our complete bot collection</p>
+            </a>
+        </div>
+        {% endif %}
+        
+        <div class="text-center mt-8">
+            <a href="/services/bots/" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline">View All AI Bots &rarr;</a>
+        </div>
+    </div>
+</section>
+
+<!-- Use Cases -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Common Use Cases</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2"><i class="fas fa-clock text-blue-600 dark:text-blue-400 mr-2"></i>Process Automation</h3>
+                <p class="text-gray-600 dark:text-gray-300">Automate repetitive tasks and workflows to save time and reduce errors.</p>
+            </div>
+            <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2"><i class="fas fa-chart-line text-blue-600 dark:text-blue-400 mr-2"></i>Predictive Analytics</h3>
+                <p class="text-gray-600 dark:text-gray-300">Use AI to predict trends and make data-driven decisions.</p>
+            </div>
+            <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2"><i class="fas fa-headset text-blue-600 dark:text-blue-400 mr-2"></i>Customer Support</h3>
+                <p class="text-gray-600 dark:text-gray-300">Deploy AI chatbots for 24/7 customer support and faster response times.</p>
+            </div>
+            <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2"><i class="fas fa-shield-alt text-blue-600 dark:text-blue-400 mr-2"></i>Compliance & Security</h3>
+                <p class="text-gray-600 dark:text-gray-300">Automate compliance monitoring and security threat detection.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQs -->
+<section class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Frequently Asked Questions</h2>
+        
+        <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How can AI automation help my {{ industry.name|lower }} business?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI automation can help reduce manual workloads, improve accuracy, reduce costs, and enable 24/7 operations. Our custom bots are designed to address specific challenges in the {{ industry.name|lower }} sector."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take to implement AI automation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Implementation time varies based on complexity. Most bot deployments can be completed within 2-4 weeks. We provide a timeline during the consultation phase."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the ROI for AI automation in {{ industry.name|lower }}?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our clients typically see ROI within 3-6 months through reduced labor costs, improved efficiency, and error reduction. Actual results vary based on implementation scope."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you offer custom bot development for specific needs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we specialize in custom AI bot development tailored to your specific business requirements. Contact us to discuss your unique needs."
+      }
+    }
+  ]
+}
+</script>
+        
+        <div class="space-y-4">
+            <div class="bg-white dark:bg-gray-700 rounded-lg p-6 shadow-sm">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">How can AI automation help my {{ industry.name|lower }} business?</h3>
+                <p class="text-gray-600 dark:text-gray-300">AI automation can help reduce manual workloads, improve accuracy, reduce costs, and enable 24/7 operations. Our custom bots are designed to address specific challenges in the {{ industry.name|lower }} sector.</p>
+            </div>
+            <div class="bg-white dark:bg-gray-700 rounded-lg p-6 shadow-sm">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">How long does it take to implement AI automation?</h3>
+                <p class="text-gray-600 dark:text-gray-300">Implementation time varies based on complexity. Most bot deployments can be completed within 2-4 weeks. We provide a timeline during the consultation phase.</p>
+            </div>
+            <div class="bg-white dark:bg-gray-700 rounded-lg p-6 shadow-sm">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">What is the ROI for AI automation in {{ industry.name|lower }}?</h3>
+                <p class="text-gray-600 dark:text-gray-300">Our clients typically see ROI within 3-6 months through reduced labor costs, improved efficiency, and error reduction. Actual results vary based on implementation scope.</p>
+            </div>
+            <div class="bg-white dark:bg-gray-700 rounded-lg p-6 shadow-sm">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Do you offer custom bot development for specific needs?</h3>
+                <p class="text-gray-600 dark:text-gray-300">Yes, we specialize in custom AI bot development tailored to your specific business requirements. Contact us to discuss your unique needs.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-16 bg-blue-600 dark:bg-blue-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-white mb-4">Ready to Transform Your {{ industry.name }} Operations?</h2>
+        <p class="text-blue-100 mb-8 max-w-2xl mx-auto">Schedule a free consultation to discover how AI automation can revolutionize your business.</p>
+        <a href="/contact/" class="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition inline-block">
+            Book Free Consultation
+        </a>
+    </div>
+</section>
+
+<!-- Sticky CTA for Mobile -->
+<div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg p-4 md:hidden z-50 flex justify-between items-center">
+    <div class="text-sm">
+        <div class="font-semibold text-gray-900 dark:text-white">Ready to automate?</div>
+        <div class="text-gray-500 dark:text-gray-400 text-xs">Book a free call</div>
+    </div>
+    <a href="/contact/" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm">Get Started</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const replaced = document.body.innerHTML.replace(/slugify/g, 'slugify').replace(/replace/g, 'replace');
+});
+</script>
+{% endblock %}

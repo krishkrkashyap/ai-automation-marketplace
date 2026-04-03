@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ slug|slugify|title }} | AI Automation Services{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="mb-4 text-sm">
+            <a href="/" class="text-blue-300 hover:text-white">Home</a> / 
+            <a href="/services/" class="text-blue-300 hover:text-white">Services</a> / 
+            <span class="text-white">{{ slug|slugify|title }}</span>
+        </nav>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">{{ slug|slugify|title }}</h1>
+    </div>
+</section>
+
+<section class="py-16 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="prose max-w-3xl">
+            <p class="text-xl text-gray-600 dark:text-gray-300">This service category is coming soon. Contact us for more information.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

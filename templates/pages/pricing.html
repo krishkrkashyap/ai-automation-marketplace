@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Pricing | AI Automation Marketplace{% endblock %}
+
+{% block meta_description %}Flexible pricing plans for AI automation services. Choose the plan that fits your business needs.{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 dark:from-blue-950 dark:via-blue-900 dark:to-indigo-950 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Flexible Pricing Plans</h1>
+        <p class="text-xl text-blue-100 max-w-2xl mx-auto">Choose the perfect plan for your AI automation needs.</p>
+    </div>
+</section>
+
+<section class="py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {% for tier in pricing_tiers %}
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+                {% if tier.name == 'Professional' %}
+                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 text-white px-4 py-1 rounded-full text-sm" style="background-color: var(--primary-color)">Most Popular</span>
+                {% endif %}
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ tier.name }}</h3>
+                <div class="text-4xl font-bold mb-2" style="color: var(--primary-color)">{{ tier.price }}</div>
+                <p class="text-gray-500 dark:text-gray-400 mb-6">{{ tier.description }}</p>
+                <ul class="space-y-3 mb-8">
+                    {% for feature in tier.features %}
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span class="text-gray-700 dark:text-gray-300">{{ feature }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <a href="/contact/" class="block text-center text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition" style="background-color: var(--primary-color)">
+                    Get Started
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Frequently Asked Questions</h2>
+        <div class="max-w-3xl mx-auto space-y-6">
+            <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">How long does implementation take?</h3>
+                <p class="text-gray-600 dark:text-gray-300">Most bot implementations take 2-4 weeks depending on complexity. Custom solutions may take longer.</p>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Do you offer support?</h3>
+                <p class="text-gray-600 dark:text-gray-300">Yes, all plans include ongoing support and maintenance. Higher tiers include priority 24/7 support.</p>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Can I customize the bots?</h3>
+                <p class="text-gray-600 dark:text-gray-300">Absolutely! All our bots are fully customizable to match your specific business requirements.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

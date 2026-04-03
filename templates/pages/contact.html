@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us | AI Automation Marketplace{% endblock %}
+
+{% block meta_description %}Get in touch with our team for AI automation consultation. We're here to help transform your business.{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 dark:from-blue-950 dark:via-blue-900 dark:to-indigo-950 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
+        <p class="text-xl text-blue-100 max-w-2xl mx-auto">Ready to transform your business with AI automation? Let's talk.</p>
+    </div>
+</section>
+
+<section class="py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Contact Form -->
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Send us a Message</h2>
+                <form class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
+                            <input type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand focus:border-transparent" style="--tw-ring-color: var(--primary-color)" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
+                            <input type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand focus:border-transparent" style="--tw-ring-color: var(--primary-color)" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                        <input type="email" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand focus:border-transparent" style="--tw-ring-color: var(--primary-color)" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand focus:border-transparent" style="--tw-ring-color: var(--primary-color)">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Industry</label>
+                        <select class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand focus:border-transparent" style="--tw-ring-color: var(--primary-color)">
+                            <option>Select your industry</option>
+                            <option>E-Commerce</option>
+                            <option>Finance</option>
+                            <option>Healthcare</option>
+                            <option>Education</option>
+                            <option>Real Estate</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message</label>
+                        <textarea rows="4" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand focus:border-transparent" style="--tw-ring-color: var(--primary-color)" required></textarea>
+                    </div>
+                    <button type="submit" class="w-full text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition" style="background-color: var(--primary-color)">
+                        Send Message
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Contact Info -->
+            <div>
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Get in Touch</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4" style="background-color: var(--primary-color)">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">hello@aiservices.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4" style="background-color: var(--primary-color)">
+                                <i class="fas fa-phone text-white"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4" style="background-color: var(--primary-color)">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Location</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">San Francisco, CA</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Office Hours</h2>
+                    <p class="text-gray-600 dark:text-gray-300 mb-2">Monday - Friday: 9:00 AM - 6:00 PM</p>
+                    <p class="text-gray-600 dark:text-gray-300">Saturday - Sunday: Closed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

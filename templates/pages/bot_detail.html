@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ bot.name }} for {{ bot.industry }} | Automated AI Bot{% endblock %}
+
+{% block meta_description %}{{ bot.description }} Deploy this AI-powered bot for your {{ bot.industry|lower }} operations. Features include {% for f in bot.features %}{{ f }}{% if not forloop.last %}, {% endif %}{% endfor %}. Transform your business with intelligent automation.{% endblock %}
+
+{% block seo %}
+<meta property="og:title" content="{{ bot.name }} | AI Automation for {{ bot.industry }}">
+<meta property="og:description" content="{{ bot.description }} Streamline your {{ bot.industry|lower }} operations with this powerful AI bot.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+
+{% block content %}
+<!-- SoftwareApplication Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "{{ bot.name }}",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Cloud-based",
+  "description": "{{ bot.description }}",
+  "offers": {
+    "@type": "Offer",
+    "price": "Custom",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "AI Automation Marketplace"
+  }
+}
+</script>
+
+<!-- Breadcrumb Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://example.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI Bots", "item": "https://example.com/services/bots/"},
+    {"@type": "ListItem", "position": 3, "name": "{{ bot.name }}", "item": "https://example.com/services/bots/{{ slug }}/"}
+  ]
+}
+</script>
+
+<!-- Breadcrumb -->
+<nav class="bg-gray-100 dark:bg-gray-800 py-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ol class="flex items-center space-x-2 text-sm" itemscope itemtype="https://schema.org/BreadcrumbList">
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/" itemprop="item" class="text-gray-500 dark:text-gray-400 hover:text-blue-600"><span itemprop="name">Home</span></a><meta itemprop="position" content="1"></li>
+            <li><span class="text-gray-400">/</span></li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/services/" itemprop="item" class="text-gray-500 dark:text-gray-400 hover:text-blue-600"><span itemprop="name">Services</span></a><meta itemprop="position" content="2"></li>
+            <li><span class="text-gray-400">/</span></li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><a href="/services/bots/" itemprop="item" class="text-gray-500 dark:text-gray-400 hover:text-blue-600"><span itemprop="name">AI Bots</span></a><meta itemprop="position" content="3"></li>
+            <li><span class="text-gray-400">/</span></li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><span itemprop="name" class="text-gray-900 dark:text-white">{{ bot.name }}</span><meta itemprop="position" content="4"></li>
+        </ol>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 dark:from-blue-950 dark:via-blue-900 dark:to-indigo-950 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <span class="text-6xl">🤖</span>
+            <div>
+                <h1 class="text-4xl md:text-5xl font-bold">{{ bot.name }}</h1>
+                <p class="text-blue-200 mt-2 text-lg">AI-Powered Automation for {{ bot.industry }}</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <span class="px-3 py-1 bg-blue-800 dark:bg-blue-900 rounded-full text-sm">AI Bot</span>
+                    <span class="px-3 py-1 bg-blue-800 dark:bg-blue-900 rounded-full text-sm">{{ bot.industry }}</span>
+                </div>
+            </div>
+        </div>
+        <p class="text-xl text-blue-100 max-w-3xl mt-6">{{ bot.description }}</p>
+        <div class="flex flex-col sm:flex-row gap-4 mt-6">
+            <a href="/contact/" class="bg-white text-blue-900 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition inline-block">Request Demo</a>
+            <a href="#features" class="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 transition inline-block">View Features</a>
+        </div>
+    </div>
+</section>
+
+<!-- What is this bot -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">What is {{ bot.name }}?</h2>
+        <div class="prose max-w-none text-gray-600 dark:text-gray-300">
+            <p class="text-lg">{{ bot.description }}</p>
+            <p>This AI-powered bot is specifically designed for {{ bot.industry|lower }} operations, helping businesses automate repetitive tasks, improve efficiency, and reduce operational costs.</p>
+            <p>Whether you're a small business or enterprise, {{ bot.name }} can be customized to meet your specific needs and integrated seamlessly into your existing workflows.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Business Problems It Solves -->
+<section class="py-16 bg-red-50 dark:bg-red-900/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Business Problems It Solves</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">Many businesses face these challenges that {{ bot.name }} can address:</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex items-start p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                <i class="fas fa-clock text-red-500 dark:text-red-400 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">Time-Consuming Manual Processes</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Automate repetitive tasks that consume hours of employee time daily.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                <i class="fas fa-exclamation-circle text-red-500 dark:text-red-400 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">Human Errors</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Reduce errors that can lead to costly mistakes and customer dissatisfaction.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                <i class="fas fa-dollar-sign text-red-500 dark:text-red-400 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">High Operational Costs</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Lower costs by automating processes that would otherwise require additional staff.</p>
+                </div>
+            </div>
+            <div class="flex items-start p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                <i class="fas fa-bullseye text-red-500 dark:text-red-400 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">Limited Scalability</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">Easily scale operations without proportional increases in headcount.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">How {{ bot.name }} Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">1</span>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Setup</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">Configure the bot with your specific requirements and integrate with your systems.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">2</span>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Training</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">AI models are trained on your data to understand your specific workflows.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">3</span>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Deployment</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">Deploy the bot to start automating your processes immediately.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">4</span>
+                </div>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Optimization</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">Continuously improve performance based on feedback and analytics.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Key Features</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">Powerful capabilities to transform your {{ bot.industry|lower }} operations.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for feature in bot.features %}
+            <div class="flex items-start p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-100 dark:border-gray-600">
+                <i class="fas fa-check-circle text-green-500 dark:text-green-400 mt-1 mr-3"></i>
+                <span class="text-gray-700 dark:text-gray-200">{{ feature }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Use Cases -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Use Cases by Industry</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">{{ bot.name }} can be applied across various industries:</p>
+        <div class="flex flex-wrap gap-3">
+            {% for use_case in bot.use_cases %}
+            <a href="/industries/{{ use_case|lower|slugify }}-automation/" class="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-900/50 transition">
+                {{ use_case }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Integrations -->
+<section class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Integrations</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div class="bg-white dark:bg-gray-700 p-4 rounded-lg text-center shadow-sm">
+                <i class="fab fa-slack text-2xl text-gray-600 dark:text-gray-300 mb-2"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Slack</p>
+            </div>
+            <div class="bg-white dark:bg-gray-700 p-4 rounded-lg text-center shadow-sm">
+                <i class="fab fa-salesforce text-2xl text-gray-600 dark:text-gray-300 mb-2"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Salesforce</p>
+            </div>
+            <div class="bg-white dark:bg-gray-700 p-4 rounded-lg text-center shadow-sm">
+                <i class="fab fa-hubspot text-2xl text-gray-600 dark:text-gray-300 mb-2"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-300">HubSpot</p>
+            </div>
+            <div class="bg-white dark:bg-gray-700 p-4 rounded-lg text-center shadow-sm">
+                <i class="fab fa-zapier text-2xl text-gray-600 dark:text-gray-300 mb-2"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Zapier</p>
+            </div>
+            <div class="bg-white dark:bg-gray-700 p-4 rounded-lg text-center shadow-sm">
+                <i class="fab fa-aws text-2xl text-gray-600 dark:text-gray-300 mb-2"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-300">AWS</p>
+            </div>
+            <div class="bg-white dark:bg-gray-700 p-4 rounded-lg text-center shadow-sm">
+                <i class="fab fa-google text-2xl text-gray-600 dark:text-gray-300 mb-2"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Google</p>
+            </div>
+        </div>
+        <p class="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm">Custom integrations available on request</p>
+    </div>
+</section>
+
+<!-- Compliance & Security -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Compliance & Security</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="p-6 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <i class="fas fa-shield-alt text-green-600 dark:text-green-400 text-2xl mb-3"></i>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Data Encryption</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">All data is encrypted at rest and in transit using industry-standard protocols.</p>
+            </div>
+            <div class="p-6 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <i class="fas fa-user-shield text-green-600 dark:text-green-400 text-2xl mb-3"></i>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">SOC 2 Compliant</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">Our infrastructure meets SOC 2 security standards.</p>
+            </div>
+            <div class="p-6 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <i class="fas fa-lock text-green-600 dark:text-green-400 text-2xl mb-3"></i>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">GDPR Ready</h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">Full GDPR compliance with data privacy controls.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Pricing Model</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600">
+                <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">Starter</h3>
+                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">$499<span class="text-sm text-gray-500 dark:text-gray-400 font-normal">/month</span></div>
+                <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">Perfect for small businesses</p>
+                <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>1 bot deployment</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Basic support</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Standard integrations</li>
+                </ul>
+            </div>
+            <div class="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-lg border-2 border-blue-500 dark:border-blue-400">
+                <div class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-3">POPULAR</div>
+                <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">Professional</h3>
+                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">$1,499<span class="text-sm text-gray-500 dark:text-gray-400 font-normal">/month</span></div>
+                <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">For growing businesses</p>
+                <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>3 bot deployments</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Priority support</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Advanced integrations</li>
+                </ul>
+            </div>
+            <div class="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-600">
+                <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">Enterprise</h3>
+                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">Custom</div>
+                <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">For large organizations</p>
+                <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Unlimited bots</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>24/7 support</li>
+                    <li><i class="fas fa-check text-green-500 mr-2"></i>Custom development</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQs -->
+<section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Frequently Asked Questions</h2>
+        
+        <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long does it take to implement {{ bot.name }}?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most implementations can be completed within 2-4 weeks, depending on complexity and customization requirements."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can {{ bot.name }} integrate with our existing systems?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we offer integrations with popular platforms like Slack, Salesforce, HubSpot, and more. Custom integrations are also available."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What kind of support do you offer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We offer email support, documentation, and video tutorials. Professional and Enterprise plans include priority and 24/7 support."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there a free trial available?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we offer a free consultation to discuss your needs. Contact us to schedule a demo and learn how {{ bot.name }} can benefit your business."
+      }
+    }
+  ]
+}
+</script>
+        
+        <div class="space-y-4">
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">How long does it take to implement {{ bot.name }}?</h3>
+                <p class="text-gray-600 dark:text-gray-300">Most implementations can be completed within 2-4 weeks, depending on complexity and customization requirements.</p>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Can {{ bot.name }} integrate with our existing systems?</h3>
+                <p class="text-gray-600 dark:text-gray-300">Yes, we offer integrations with popular platforms like Slack, Salesforce, HubSpot, and more. Custom integrations are also available.</p>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">What kind of support do you offer?</h3>
+                <p class="text-gray-600 dark:text-gray-300">We offer email support, documentation, and video tutorials. Professional and Enterprise plans include priority and 24/7 support.</p>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Is there a free trial available?</h3>
+                <p class="text-gray-600 dark:text-gray-300">Yes, we offer a free consultation to discuss your needs. Contact us to schedule a demo and learn how {{ bot.name }} can benefit your business.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Bots -->
+<section class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Related AI Bots</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="/services/bots/customer-support-bot/" class="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm hover:shadow-lg transition">
+                <i class="fas fa-headset text-blue-600 dark:text-blue-400 text-2xl mb-3"></i>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Customer Support Bot</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300">AI-powered 24/7 customer support</p>
+            </a>
+            <a href="/services/bots/lead-qualification-bot/" class="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm hover:shadow-lg transition">
+                <i class="fas fa-user-plus text-blue-600 dark:text-blue-400 text-2xl mb-3"></i>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Lead Qualification Bot</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Automate lead screening and scoring</p>
+            </a>
+            <a href="/services/bots/automation/" class="bg-white dark:bg-gray-700 p-6 rounded-xl shadow-sm hover:shadow-lg transition">
+                <i class="fas fa-cogs text-blue-600 dark:text-blue-400 text-2xl mb-3"></i>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">View All Bots</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Explore our complete bot collection</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-16 bg-blue-600 dark:bg-blue-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-white mb-4">Ready to Deploy {{ bot.name }}?</h2>
+        <p class="text-blue-100 mb-8 max-w-2xl mx-auto">Get started with AI automation today. Schedule a free consultation to discuss your needs.</p>
+        <a href="/contact/" class="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition inline-block">
+            Request Demo
+        </a>
+    </div>
+</section>
+
+<!-- Sticky CTA -->
+<div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg p-4 md:hidden z-50 flex justify-between items-center">
+    <div class="text-sm">
+        <div class="font-semibold text-gray-900 dark:text-white">Ready to automate?</div>
+        <div class="text-gray-500 dark:text-gray-400 text-xs">Book a free call</div>
+    </div>
+    <a href="/contact/" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm">Get Started</a>
+</div>
+{% endblock %}

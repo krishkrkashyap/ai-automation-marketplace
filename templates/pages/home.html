@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Automation Services Marketplace | AI Bots & Automation Solutions{% endblock %}
+
+{% block meta_description %}Discover 100+ AI automation services across 28 industries. Custom bots, RPA, chatbots, and intelligent automation solutions for your business.{% endblock %}
+
+{% block seo %}
+<meta property="og:title" content="AI Automation Services Marketplace">
+<meta property="og:description" content="Comprehensive AI automation services for all industries. Bot development, RPA, chatbots, and more.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-gradient text-white py-32 relative overflow-hidden">
+    <!-- Floating AI Icons -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-10 text-6xl opacity-20 animate-float">🤖</div>
+        <div class="absolute top-40 right-20 text-5xl opacity-20 animate-float-delayed">⚡</div>
+        <div class="absolute bottom-20 left-1/4 text-4xl opacity-20 animate-float">🧠</div>
+        <div class="absolute bottom-40 right-1/3 text-5xl opacity-20 animate-float-delayed">🔮</div>
+        <div class="absolute top-1/3 left-1/3 text-4xl opacity-15 animate-float" style="animation-delay: 1s;">⚙️</div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center max-w-4xl mx-auto">
+            <div class="scroll-fade-up">
+                <span class="inline-block px-4 py-2 bg-white/10 rounded-full text-sm mb-6 backdrop-blur-sm">
+                    🚀 AI-Powered Business Transformation
+                </span>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 scroll-fade-up delay-100">
+                AI Automation Services <span class="gradient-text">for Every Industry</span>
+            </h1>
+            <p class="text-xl text-blue-100 mb-8 scroll-fade-up delay-200">
+                Transform your business with 100+ AI-powered automation solutions. 
+                From chatbots to predictive analytics, we've got you covered.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center scroll-fade-up delay-300">
+                <a href="/contact/" class="group bg-white text-blue-900 px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/25">
+                    <span class="relative z-10">Get a Free Consultation</span>
+                </a>
+                <a href="/services/" class="group border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all duration-300 hover:scale-105">
+                    <span>Explore Services</span>
+                    <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scan Line Effect -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent animate-scan"></div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-16 bg-white dark:bg-gray-800 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="text-center scroll-fade-up">
+                <div class="text-5xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 bg-clip-text text-transparent mb-2">28+</div>
+                <div class="text-gray-600 dark:text-gray-300 font-medium">Industries</div>
+            </div>
+            <div class="text-center scroll-fade-up delay-100">
+                <div class="text-5xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 bg-clip-text text-transparent mb-2">100+</div>
+                <div class="text-gray-600 dark:text-gray-300 font-medium">AI Services</div>
+            </div>
+            <div class="text-center scroll-fade-up delay-200">
+                <div class="text-5xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 bg-clip-text text-transparent mb-2">500+</div>
+                <div class="text-gray-600 dark:text-gray-300 font-medium">Clients</div>
+            </div>
+            <div class="text-center scroll-fade-up delay-300">
+                <div class="text-5xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 bg-clip-text text-transparent mb-2">98%</div>
+                <div class="text-gray-600 dark:text-gray-300 font-medium">Satisfaction</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Industries Grid -->
+<section class="py-20 bg-gray-50 dark:bg-gray-900 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16 scroll-fade-up">
+            <h2 class="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                Industries We <span class="gradient-text">Serve</span>
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-lg">AI automation solutions tailored to your industry's unique challenges.</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {% for industry in industries %}
+            <a href="{{ industry.url }}" class="group bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 hover-lift scroll-scale" style="animation-delay: {{ forloop.counter0 }}0ms">
+                <div class="text-4xl mb-3 transform group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300">{{ industry.icon }}</div>
+                <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-brand transition-colors" style="color: var(--primary-color)">{{ industry.name }}</h3>
+            </a>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-12 scroll-fade-up">
+            <a href="/industries/" class="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold hover:scale-105 transition-all duration-300" style="background-color: var(--primary-color); color: white;">
+                View All Industries <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="py-20 bg-white dark:bg-gray-800 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16 scroll-fade-up">
+            <h2 class="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                Our AI <span class="gradient-text">Automation</span> Services
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-lg">Comprehensive automation solutions to streamline your operations.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for service in services %}
+            <a href="{{ service.url }}" class="group p-8 border-2 border-gray-100 dark:border-gray-700 rounded-2xl hover:border-current transition-all duration-300 hover-lift bg-white dark:bg-gray-700 scroll-scale" style="border-color: transparent; --tw-border-opacity: 1;">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300" style="background-color: var(--primary-color); box-shadow: 0 10px 30px var(--primary-color);">
+                    <i class="{{ service.icon }} text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-brand transition-colors" style="color: var(--primary-color)">{{ service.name }}</h3>
+                <p class="text-gray-600 dark:text-gray-300">{{ service.description }}</p>
+                <div class="mt-4 flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity" style="color: var(--primary-color)">
+                    Learn more <i class="fas fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Bots -->
+<section class="py-20 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16 scroll-fade-up">
+            <h2 class="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                Popular AI <span class="gradient-text">Bots</span>
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-lg">Ready-to-deploy AI solutions for common business needs.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for bot in bots %}
+            <a href="{{ bot.url }}" class="group bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover-lift hover-glow scroll-scale" style="animation-delay: {{ forloop.counter0 }}100ms">
+                <div class="text-4xl mb-4 transform group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300">{{ bot.icon }}</div>
+                <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ bot.name }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-300">{{ bot.description }}</p>
+                <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <span class="text-sm font-medium group-hover:text-brand transition-colors" style="color: var(--primary-color)">View Details →</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Grid -->
+<section class="py-20 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center p-8 scroll-fade-up">
+                <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style="background-color: var(--primary-color)">
+                    <i class="fas fa-rocket text-white text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Fast Implementation</h3>
+                <p class="text-gray-600 dark:text-gray-300">Deploy AI solutions in weeks, not months.</p>
+            </div>
+            <div class="text-center p-8 scroll-fade-up delay-100">
+                <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style="background-color: var(--primary-color)">
+                    <i class="fas fa-shield-alt text-white text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Enterprise Security</h3>
+                <p class="text-gray-600 dark:text-gray-300">Bank-grade encryption and compliance.</p>
+            </div>
+            <div class="text-center p-8 scroll-fade-up delay-200">
+                <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style="background-color: var(--primary-color)">
+                    <i class="fas fa-chart-line text-white text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Proven ROI</h3>
+                <p class="text-gray-600 dark:text-gray-300">Average 300% ROI within first year.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 relative overflow-hidden" style="background: linear-gradient(135deg, var(--primary-color), #8b5cf6);">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-10 left-10 w-40 h-40 bg-white/10 rounded-full animate-float"></div>
+        <div class="absolute bottom-10 right-10 w-60 h-60 bg-white/10 rounded-full animate-float-delayed"></div>
+        <div class="absolute top-1/2 left-1/2 w-96 h-96 bg-white/5 rounded-full animate-pulse-slow"></div>
+    </div>
+    
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 scroll-fade-up">
+        <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
+            Ready to Transform Your Business?
+        </h2>
+        <p class="text-white/90 text-xl mb-10 max-w-2xl mx-auto">
+            Schedule a free consultation and discover how AI automation can revolutionize your operations.
+        </p>
+        <a href="/contact/" class="inline-block bg-white text-gray-900 px-10 py-5 rounded-2xl font-bold text-lg hover:scale-110 transition-all duration-300 hover:shadow-2xl">
+            Book a Free Consultation
+        </a>
+    </div>
+</section>
+{% endblock %}

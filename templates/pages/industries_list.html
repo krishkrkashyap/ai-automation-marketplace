@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Industries We Serve | AI Automation Marketplace{% endblock %}
+
+{% block meta_description %}Explore AI automation solutions for 28 industries including E-Commerce, Finance, Healthcare, Education, and more.{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero-gradient text-white py-20 relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-10 left-10 text-6xl opacity-20 animate-float">🏭</div>
+        <div class="absolute bottom-10 right-20 text-5xl opacity-20 animate-float-delayed">🏥</div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 scroll-fade-up">Industries We <span class="gradient-text">Serve</span></h1>
+        <p class="text-xl text-blue-100 max-w-2xl mx-auto scroll-fade-up delay-100">AI automation solutions tailored to your industry's unique challenges and requirements.</p>
+    </div>
+</section>
+
+<!-- Industries Grid -->
+<section class="py-20 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for industry in industries %}
+            <a href="{{ industry.url }}" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 hover-lift group scroll-scale" style="animation-delay: {{ forloop.counter0 }}50ms">
+                <div class="text-4xl mb-3 transform group-hover:scale-110 transition-transform">{{ industry.icon }}</div>
+                <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-brand transition-colors" style="color: var(--primary-color)">{{ industry.name }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">AI Automation &rarr;</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center scroll-fade-up">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Don't See Your Industry?</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">Our AI solutions are adaptable to virtually any industry. Contact us to discuss your specific needs.</p>
+        <a href="/contact/" class="inline-block text-white px-8 py-4 rounded-xl font-semibold hover:scale-105 transition-all duration-300" style="background-color: var(--primary-color)">
+            Get Custom Consultation
+        </a>
+    </div>
+</section>
+{% endblock %}

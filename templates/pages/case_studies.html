@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Case Studies | AI Automation Marketplace{% endblock %}
+
+{% block meta_description %}See how we've helped businesses transform with AI automation. Real results, real ROI.{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Success Stories</h1>
+        <p class="text-xl text-blue-100 max-w-2xl mx-auto">See how businesses like yours have transformed with AI automation.</p>
+    </div>
+</section>
+
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <article class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
+                <div class="h-48 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                    <i class="fas fa-shopping-cart text-white text-5xl"></i>
+                </div>
+                <div class="p-6">
+                    <span class="text-sm text-blue-600 font-medium">E-Commerce</span>
+                    <h3 class="text-xl font-bold text-gray-900 mt-2 mb-3">50% Reduction in Customer Support Tickets</h3>
+                    <p class="text-gray-600 mb-4">How a leading e-commerce retailer automated customer support with AI chatbots.</p>
+                    <a href="#" class="text-blue-600 font-medium hover:underline">Read More &rarr;</a>
+                </div>
+            </article>
+            
+            <article class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
+                <div class="h-48 bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
+                    <i class="fas fa-university text-white text-5xl"></i>
+                </div>
+                <div class="p-6">
+                    <span class="text-sm text-green-600 font-medium">Finance</span>
+                    <h3 class="text-xl font-bold text-gray-900 mt-2 mb-3">80% Faster Invoice Processing</h3>
+                    <p class="text-gray-600 mb-4">A financial services company automated invoice processing with AI OCR.</p>
+                    <a href="#" class="text-blue-600 font-medium hover:underline">Read More &rarr;</a>
+                </div>
+            </article>
+            
+            <article class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition">
+                <div class="h-48 bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                    <i class="fas fa-heartbeat text-white text-5xl"></i>
+                </div>
+                <div class="p-6">
+                    <span class="text-sm text-purple-600 font-medium">Healthcare</span>
+                    <h3 class="text-xl font-bold text-gray-900 mt-2 mb-3">Automated Patient Scheduling</h3>
+                    <p class="text-gray-600 mb-4">A healthcare provider improved patient scheduling efficiency by 70%.</p>
+                    <a href="#" class="text-blue-600 font-medium hover:underline">Read More &rarr;</a>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Ready to Write Your Success Story?</h2>
+        <p class="text-gray-600 mb-8 max-w-2xl mx-auto">Join hundreds of businesses transforming with AI automation.</p>
+        <a href="/contact/" class="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition">
+            Start Your Transformation
+        </a>
+    </div>
+</section>
+{% endblock %}

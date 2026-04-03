@@ -1,0 +1,139 @@
+<header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center">
+                <a href="/" class="flex items-center">
+                    <i class="fas fa-robot text-2xl mr-2" style="color: var(--primary-color)"></i>
+                    <span class="font-bold text-xl text-gray-900 dark:text-white">AI Automation</span>
+                </a>
+            </div>
+            
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="/" class="text-gray-700 dark:text-gray-200 hover:opacity-80 transition font-medium" style="color: var(--primary-color)">Home</a>
+                
+                <!-- Industries Dropdown -->
+                <div class="relative group" id="nav-industries">
+                    <button type="button" class="text-gray-700 dark:text-gray-200 hover:opacity-80 transition flex items-center font-medium py-5" style="color: var(--primary-color)">
+                        Industries <i class="fas fa-chevron-down ml-1 text-xs transition-transform group-hover:rotate-180"></i>
+                    </button>
+                    <div class="absolute left-0 top-full mt-0 w-56 bg-white dark:bg-gray-700 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-50 border border-gray-100 dark:border-gray-600">
+                        <div class="py-2">
+                            <a href="/industries/ecommerce-automation/" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 transition">
+                                <span class="text-xl mr-3">🛒</span>
+                                <div>
+                                    <div class="font-medium">E-Commerce</div>
+                                    <div class="text-xs text-gray-500">Online store automation</div>
+                                </div>
+                            </a>
+                            <a href="/industries/finance-automation/" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 transition">
+                                <span class="text-xl mr-3">💰</span>
+                                <div>
+                                    <div class="font-medium">Finance</div>
+                                    <div class="text-xs text-gray-500">Financial automation</div>
+                                </div>
+                            </a>
+                            <a href="/industries/healthcare-automation/" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 transition">
+                                <span class="text-xl mr-3">🏥</span>
+                                <div>
+                                    <div class="font-medium">Healthcare</div>
+                                    <div class="text-xs text-gray-500">Medical automation</div>
+                                </div>
+                            </a>
+                            <a href="/industries/" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 transition border-t dark:border-gray-600 mt-1">
+                                <span class="text-xl mr-3">📋</span>
+                                <div>
+                                    <div class="font-medium" style="color: var(--primary-color)">View All Industries</div>
+                                    <div class="text-xs text-gray-500">Browse all 28 industries</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Services Dropdown -->
+                <div class="relative group" id="nav-services">
+                    <button type="button" class="text-gray-700 dark:text-gray-200 hover:opacity-80 transition flex items-center font-medium py-5" style="color: var(--primary-color)">
+                        Services <i class="fas fa-chevron-down ml-1 text-xs transition-transform group-hover:rotate-180"></i>
+                    </button>
+                    <div class="absolute left-0 top-full mt-0 w-56 bg-white dark:bg-gray-700 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-50 border border-gray-100 dark:border-gray-600">
+                        <div class="py-2">
+                            <a href="/services/bots/" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 transition">
+                                <span class="text-xl mr-3">🤖</span>
+                                <div>
+                                    <div class="font-medium">AI Bots</div>
+                                    <div class="text-xs text-gray-500">Intelligent automation bots</div>
+                                </div>
+                            </a>
+                            <a href="/services/rpa/" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 transition">
+                                <span class="text-xl mr-3">⚙️</span>
+                                <div>
+                                    <div class="font-medium">RPA Solutions</div>
+                                    <div class="text-xs text-gray-500">Robotic process automation</div>
+                                </div>
+                            </a>
+                            <a href="/services/ai-chatbots/" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 transition">
+                                <span class="text-xl mr-3">💬</span>
+                                <div>
+                                    <div class="font-medium">AI Chatbots</div>
+                                    <div class="text-xs text-gray-500">Conversational AI</div>
+                                </div>
+                            </a>
+                            <a href="/services/" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-600 transition border-t dark:border-gray-600 mt-1">
+                                <span class="text-xl mr-3">📋</span>
+                                <div>
+                                    <div class="font-medium" style="color: var(--primary-color)">View All Services</div>
+                                    <div class="text-xs text-gray-500">Browse all services</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="/case-studies/" class="text-gray-700 dark:text-gray-200 hover:opacity-80 transition font-medium" style="color: var(--primary-color)">Case Studies</a>
+                <a href="/pricing/" class="text-gray-700 dark:text-gray-200 hover:opacity-80 transition font-medium" style="color: var(--primary-color)">Pricing</a>
+            </nav>
+            
+            <div class="flex items-center space-x-2">
+                <!-- Theme Toggle Button -->
+                <button type="button" onclick="toggleTheme()" class="p-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition" title="Toggle dark mode">
+                    <i id="theme-icon" class="fas fa-moon text-lg"></i>
+                </button>
+                
+                <!-- Color Picker Dropdown -->
+                <div class="relative group" id="color-picker">
+                    <button type="button" class="p-2.5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition" title="Change color">
+                        <i class="fas fa-palette text-lg"></i>
+                    </button>
+                    <div class="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-700 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-50 p-4 border border-gray-100 dark:border-gray-600">
+                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">Theme Colors</p>
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b dark:border-gray-600">
+                            <span class="text-sm text-gray-600 dark:text-gray-300">Dark Mode</span>
+                            <button onclick="toggleTheme()" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition">
+                                <i id="theme-icon-small" class="fas fa-moon text-gray-700 dark:text-yellow-400 text-sm"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">Brand Color</p>
+                        <div class="grid grid-cols-4 gap-2 mb-3">
+                            <button onclick="changeBrandColor('#3b82f6')" class="w-10 h-10 rounded-xl bg-blue-500 hover:ring-4 hover:ring-blue-500/30 transition-all hover:scale-110" title="Blue"></button>
+                            <button onclick="changeBrandColor('#8b5cf6')" class="w-10 h-10 rounded-xl bg-purple-500 hover:ring-4 hover:ring-purple-500/30 transition-all hover:scale-110" title="Purple"></button>
+                            <button onclick="changeBrandColor('#ec4899')" class="w-10 h-10 rounded-xl bg-pink-500 hover:ring-4 hover:ring-pink-500/30 transition-all hover:scale-110" title="Pink"></button>
+                            <button onclick="changeBrandColor('#f59e0b')" class="w-10 h-10 rounded-xl bg-yellow-500 hover:ring-4 hover:ring-yellow-500/30 transition-all hover:scale-110" title="Yellow"></button>
+                            <button onclick="changeBrandColor('#10b981')" class="w-10 h-10 rounded-xl bg-green-500 hover:ring-4 hover:ring-green-500/30 transition-all hover:scale-110" title="Green"></button>
+                            <button onclick="changeBrandColor('#ef4444')" class="w-10 h-10 rounded-xl bg-red-500 hover:ring-4 hover:ring-red-500/30 transition-all hover:scale-110" title="Red"></button>
+                            <button onclick="changeBrandColor('#06b6d4')" class="w-10 h-10 rounded-xl bg-cyan-500 hover:ring-4 hover:ring-cyan-500/30 transition-all hover:scale-110" title="Cyan"></button>
+                            <button onclick="changeBrandColor('#f97316')" class="w-10 h-10 rounded-xl bg-orange-500 hover:ring-4 hover:ring-orange-500/30 transition-all hover:scale-110" title="Orange"></button>
+                        </div>
+                        <div class="pt-3 border-t dark:border-gray-600">
+                            <label class="text-xs text-gray-500 dark:text-gray-400 block mb-2">Custom Color</label>
+                            <input type="color" id="brand-color-picker" onchange="changeBrandColor(this.value)" class="w-full h-10 rounded-lg cursor-pointer border-0">
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="/contact/" class="text-white px-5 py-2.5 rounded-xl font-semibold hover:opacity-90 transition hover:scale-105" style="background-color: var(--primary-color)">
+                    Get Started
+                </a>
+            </div>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results | AI Automation Marketplace{% endblock %}
+
+{% block content %}
+<section class="bg-gray-100 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <form action="/search/" method="get" class="flex gap-4">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search services, bots, industries..." 
+                   class="flex-1 px-6 py-4 rounded-lg border border-gray-300 text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <button type="submit" class="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition">
+                Search
+            </button>
+        </form>
+    </div>
+</section>
+
+{% if query %}
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl font-bold text-gray-900 mb-8">Search Results for "{{ query }}"</h1>
+        
+        {% if results.industries or results.bots or results.services %}
+            {% if results.industries %}
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Industries</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% for item in results.industries %}
+                    <a href="{{ item.url }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition">
+                        <span class="font-medium text-gray-900">{{ item.name }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if results.services %}
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Services</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% for item in results.services %}
+                    <a href="{{ item.url }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition">
+                        <span class="font-medium text-gray-900">{{ item.name }}</span>
+                        <p class="text-sm text-gray-600">{{ item.description }}</p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if results.bots %}
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">AI Bots</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% for item in results.bots %}
+                    <a href="{{ item.url }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md transition">
+                        <span class="font-medium text-gray-900">{{ item.name }}</span>
+                        <p class="text-sm text-gray-600">{{ item.description }}</p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+            <p class="text-gray-600">No results found. Try different keywords.</p>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}
