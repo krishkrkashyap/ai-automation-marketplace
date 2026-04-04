@@ -1,0 +1,201 @@
+{
+  "name": "Government & Public Sector Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "government-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "government-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const request = $input.first().json;\nconst docType = request.document_type || 'general';\nconst verifications = {\n  'license': ['id_number', 'expiry_date', 'document_image'],\n  'permit': ['property_address', 'permit_type', 'documents'],\n  'certificate': ['applicant_name', 'certificate_type', 'supporting_docs']\n};\nconst required = verifications[docType] || [];\nconst missing = required.filter(field => !request[field]);\nconst isComplete = missing.length === 0;\nreturn {\n  request_id: request.request_id,\n  document_type: docType,\n  is_complete: isComplete,\n  missing_fields: missing,\n  status: isComplete ? 'pending_review' : 'incomplete',\n  priority: request.priority || 'normal'\n};"
+      },
+      "id": "verify-request",
+      "name": "Verify Document",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "complete-check",
+              "leftValue": "={{ $json.is_complete }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-complete",
+      "name": "IF Complete",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "service_requests",
+        "columns": {
+          "properties": {
+            "request_id": "={{ $json.request_id }}",
+            "document_type": "={{ $json.document_type }}",
+            "status": "={{ $json.status }}",
+            "priority": "={{ $json.priority }}",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "save-request",
+      "name": "Save Request",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "incomplete-notification",
+        "to": "{{ $json.applicant_email }}",
+        "subject": "Additional Information Required: {{ $json.request_id }}",
+        "text": "Your request requires additional information.\n\nMissing fields: {{ $json.missing_fields.join(', ') }}\n\nPlease submit the missing documents to continue processing your request."
+      },
+      "id": "notify-missing",
+      "name": "Notify Missing Info",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 500],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "application-received",
+        "to": "{{ $json.applicant_email }}",
+        "subject": "Application Received: {{ $json.request_id }}",
+        "text": "Your application has been received and is being processed.\n\nApplication ID: {{ $json.request_id }}\nDocument Type: {{ $json.document_type }}\nStatus: {{ $json.status }}\n\nYou will be notified of the outcome."
+      },
+      "id": "confirm-received",
+      "name": "Confirm Receipt",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Verify Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Document": {
+      "main": [
+        [
+          {
+            "node": "IF Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Complete": {
+      "main": [
+        [
+          {
+            "node": "Save Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Missing Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Request": {
+      "main": [
+        [
+          {
+            "node": "Confirm Receipt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Receipt": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "government-automation",
+  "tags": ["government", "public-sector", "citizen-services", "automation"]
+}

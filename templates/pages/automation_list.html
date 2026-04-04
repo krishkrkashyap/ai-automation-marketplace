@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Automations | AI Automation Marketplace{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="mb-4 text-sm">
+            <a href="/" class="text-blue-300 hover:text-white">Home</a> / 
+            <span class="text-white">Automations</span>
+        </nav>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">AI Automation Services</h1>
+        <p class="text-xl text-blue-200 max-w-3xl">Explore our comprehensive suite of AI-powered automation solutions across 28 categories. From business process automation to AI strategy consulting.</p>
+    </div>
+</section>
+
+<section class="py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for automation in automations %}
+            <a href="/automations/{{ automation.slug }}/" 
+               class="group bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700"
+               data-animate>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-4xl">{{ automation.icon }}</span>
+                        <span class="px-3 py-1 text-xs font-medium rounded-full" 
+                              style="background-color: {{ automation.color }}20; color: {{ automation.color }}">
+                            {{ automation.pricing_tier }}
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {{ automation.name }}
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">{{ automation.description }}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">From {{ automation.pricing.start }}</span>
+                        <span class="text-blue-600 dark:text-blue-400 text-sm font-medium group-hover:translate-x-1 transition-transform">
+                            Learn more →
+                        </span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Ready to Automate Your Business?</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">Contact us today to discuss your automation needs and get a customized quote.</p>
+        <a href="/contact/" class="inline-block px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+            Get Started
+        </a>
+    </div>
+</section>
+{% endblock %}

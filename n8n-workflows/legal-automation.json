@@ -1,0 +1,217 @@
+{
+  "name": "Legal & Compliance Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "legal-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "legal-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const contract = $input.first().json;\nconst clauses = contract.clauses || [];\nconst risks = [];\nconst checkTerms = {\n  'indemnification': { risk: 'high', text: 'broad indemnification' },\n  'liability': { risk: 'high', text: 'unlimited liability' },\n  'termination': { risk: 'medium', text: 'unilateral termination' },\n  'arbitration': { risk: 'low', text: 'binding arbitration' },\n  'confidentiality': { risk: 'low', text: 'standard NDA' }\n};\nclauses.forEach(clause => {\n  const lower = clause.toLowerCase();\n  Object.keys(checkTerms).forEach(term => {\n    if (lower.includes(term)) {\n      risks.push({ term, ...checkTerms[term] });\n    }\n  });\n});\nconst riskScore = risks.filter(r => r.risk === 'high').length * 30 + risks.filter(r => r.risk === 'medium').length * 15;\nreturn {\n  contract_id: contract.contract_id,\n  risks: risks,\n  risk_score: Math.min(100, riskScore),\n  recommendation: riskScore > 50 ? 'review_required' : 'approved',\n  clauses_analyzed: clauses.length\n};"
+      },
+      "id": "analyze-contract",
+      "name": "AI Contract Analysis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "risk-check",
+              "leftValue": "={{ $json.risk_score }}",
+              "rightValue": 50,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-risk",
+      "name": "IF High Risk",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "contracts",
+        "columns": {
+          "properties": {
+            "contract_id": "={{ $json.contract_id }}",
+            "risk_score": "={{ $json.risk_score }}",
+            "recommendation": "={{ $json.recommendation }}",
+            "status": "approved",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "save-contract",
+      "name": "Save Contract",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "legal-review",
+        "to": "{{ $json.legal_email }}",
+        "subject": "⚠️ Contract Review Required: {{ $json.contract_id }}",
+        "text": "Contract requires legal review.\n\nContract ID: {{ $json.contract_id }}\nRisk Score: {{ $json.risk_score }}\nRisks Found: {{ $json.risks.length }}\n\nDetails:\n{{ $json.risks.map(r => `- ${r.text} (${r.risk} risk)`).join('\\n') }}",
+        "options": {}
+      },
+      "id": "alert-legal",
+      "name": "Alert Legal Team",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "table": "compliance_logs",
+        "columns": {
+          "properties": {
+            "contract_id": "={{ $json.contract_id }}",
+            "action": "contract_analyzed",
+            "risk_score": "={{ $json.risk_score }}",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "log-compliance",
+      "name": "Log Compliance",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Contract Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Contract Analysis": {
+      "main": [
+        [
+          {
+            "node": "IF High Risk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF High Risk": {
+      "main": [
+        [
+          {
+            "node": "Save Contract",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Alert Legal Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Contract": {
+      "main": [
+        [
+          {
+            "node": "Log Compliance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Legal Team": {
+      "main": [
+        [
+          {
+            "node": "Log Compliance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Compliance": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "legal-automation",
+  "tags": ["legal", "compliance", "contracts", "automation"]
+}

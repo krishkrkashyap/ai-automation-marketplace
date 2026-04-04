@@ -1,0 +1,140 @@
+{
+  "name": "Agriculture & AgriTech Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "IoT Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "fetch-weather",
+      "name": "Fetch Weather Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const weather = $input.first().json;\nconst temp = weather.main?.temp - 273.15 || 20;\nconst humidity = weather.main?.humidity || 50;\nconst rainfall = weather.rain?.['1h'] || 0;\nconst recommendation = {\n  irrigation: rainfall < 2 && humidity < 60,\n  frost_risk: temp < 5,\n  pest_risk: temp > 25 && humidity > 70,\n  harvest_advice: temp > 30 ? 'early_morning' : 'optimal'\n};\nreturn {\n  temperature_c: Math.round(temp),\n  humidity: humidity,\n  rainfall_mm: rainfall,\n  recommendation: recommendation,\n  crop_status: recommendation.frost_risk ? 'at_risk' : 'healthy'\n};"
+      },
+      "id": "analyze-conditions",
+      "name": "Analyze Conditions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "crop_recommendations",
+        "columns": {
+          "properties": {
+            "temperature": "={{ $json.temperature_c }}",
+            "humidity": "={{ $json.humidity }}",
+            "recommendation": "={{ JSON.stringify($json.recommendation) }}",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "save-recommendation",
+      "name": "Save Recommendation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "farm-operations",
+        "text": "🌾 Farm Advisory\n\nTemp: {{ $json.temperature_c }}°C, Humidity: {{ $json.humidity }}%\n\nIrrigation: {{ $json.recommendation.irrigation ? '✅ Recommended' : '❌ Not needed' }}\nFrost Risk: {{ $json.recommendation.frost_risk ? '⚠️ Yes' : '✅ No' }}",
+        "options": {}
+      },
+      "id": "notify-farmer",
+      "name": "Notify Farmer",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "IoT Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Weather Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Weather Data": {
+      "main": [
+        [
+          {
+            "node": "Analyze Conditions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Conditions": {
+      "main": [
+        [
+          {
+            "node": "Save Recommendation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Recommendation": {
+      "main": [
+        [
+          {
+            "node": "Notify Farmer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "agriculture-automation",
+  "tags": ["agriculture", "agritech", "farming", "automation"]
+}

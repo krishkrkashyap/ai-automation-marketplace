@@ -1,0 +1,165 @@
+{
+  "name": "Robotic Process Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "RPA Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.invoice_source }}/invoices/pending",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "fetch-invoices",
+      "name": "Fetch Pending Invoices",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "binaryPropertyName": "invoice_pdf",
+        "options": {}
+      },
+      "id": "read-pdf",
+      "name": "Read Invoice PDF",
+      "type": "n8n-nodes-base.readBinaryFiles",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { data } = $input.first().json;\nconst extracted = {\n  invoice_number: data.invoice_num || 'Unknown',\n  vendor: data.vendor || 'Unknown Vendor',\n  amount: parseFloat(data.amount) || 0,\n  date: data.date || new Date().toISOString().split('T')[0],\n  line_items: data.items || [],\n  status: 'extracted'\n};\nreturn extracted;"
+      },
+      "id": "extract-data",
+      "name": "Extract Invoice Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "table": "invoices",
+        "columns": {
+          "properties": {
+            "invoice_number": "={{ $json.invoice_number }}",
+            "vendor": "={{ $json.vendor }}",
+            "amount": "={{ $json.amount }}",
+            "date": "={{ $json.date }}",
+            "status": "processed",
+            "processed_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "insert-invoice",
+      "name": "Insert to Database",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "rpa-ops",
+        "text": "🤖 RPA Task Complete: {{ $json.invoice_number }} processed\nVendor: {{ $json.vendor }}, Amount: ${{ $json.amount }}",
+        "options": {}
+      },
+      "id": "notify-complete",
+      "name": "Notify Completion",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "RPA Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Pending Invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Pending Invoices": {
+      "main": [
+        [
+          {
+            "node": "Read Invoice PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Invoice PDF": {
+      "main": [
+        [
+          {
+            "node": "Extract Invoice Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Invoice Data": {
+      "main": [
+        [
+          {
+            "node": "Insert to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert to Database": {
+      "main": [
+        [
+          {
+            "node": "Notify Completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "rpa-automation",
+  "tags": ["rpa", "robot", "automation", "invoice"]
+}

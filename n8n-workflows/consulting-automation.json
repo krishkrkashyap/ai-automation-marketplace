@@ -1,0 +1,163 @@
+{
+  "name": "AI Strategy & Automation Consulting",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "consulting-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "consulting-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const request = $input.first().json;\nconst companySize = request.company_size || 'mid';\nconst industry = request.industry || 'general';\nconst automationLevel = request.current_automation || 'none';\nconst assessment = {\n  company_size: companySize,\n  industry: industry,\n  current_automation: automationLevel,\n  readiness_score: 0\n};\nif (companySize === 'enterprise') assessment.readiness_score += 30;\nelse if (companySize === 'mid') assessment.readiness_score += 20;\nelse assessment.readiness_score += 10;\nif (automationLevel === 'advanced') assessment.readiness_score += 40;\nelse if (automationLevel === 'moderate') assessment.readiness_score += 25;\nelse if (automationLevel === 'basic') assessment.readiness_score += 10;\nconst highValueIndustries = ['finance', 'healthcare', 'retail', 'manufacturing'];\nif (highValueIndustries.includes(industry.toLowerCase())) assessment.readiness_score += 30;\nassessment.priority = assessment.readiness_score >= 70 ? 'high' : assessment.readiness_score >= 40 ? 'medium' : 'low';\nassessment.recommended_services = [];\nif (assessment.readiness_score < 30) assessment.recommended_services.push('Automation Assessment', 'Tool Selection');\nelse if (assessment.readiness_score < 60) assessment.recommended_services.push('Process Automation', 'Integration Services');\nelse assessment.recommended_services.push('AI Strategy', 'Custom Development', 'MLOps');\nreturn { ...request, ...assessment };"
+      },
+      "id": "assess-readiness",
+      "name": "Assess Readiness",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "consulting_requests",
+        "columns": {
+          "properties": {
+            "company_name": "={{ $json.company_name }}",
+            "industry": "={{ $json.industry }}",
+            "readiness_score": "={{ $json.readiness_score }}",
+            "priority": "={{ $json.priority }}",
+            "recommended_services": "={{ JSON.stringify($json.recommended_services) }}",
+            "status": "assessed",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "save-request",
+      "name": "Save Request",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "consulting-assessment",
+        "to": "{{ $json.email }}",
+        "subject": "Your AI Automation Readiness Assessment: {{ $json.company_name }}",
+        "text": "Thank you for your interest in our AI Strategy Consulting services!\n\nAssessment Results:\n- Company Size: {{ $json.company_size }}\n- Industry: {{ $json.industry }}\n- Current Automation: {{ $json.current_automation }}\n- Readiness Score: {{ $json.readiness_score }}/100\n- Priority: {{ $json.priority }}\n\nRecommended Services:\n{{ $json.recommended_services.join('\\n') }}\n\nOur team will reach out within 24 hours to schedule a consultation."
+      },
+      "id": "send-assessment",
+      "name": "Send Assessment",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "consulting-sales",
+        "text": "📊 New Consulting Request: {{ $json.company_name }}\n\nIndustry: {{ $json.industry }}\nReadiness: {{ $json.readiness_score }}\nPriority: {{ $json.priority }}\n\nServices: {{ $json.recommended_services.join(', ') }}",
+        "options": {}
+      },
+      "id": "notify-team",
+      "name": "Notify Team",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [850, 500],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Assess Readiness",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assess Readiness": {
+      "main": [
+        [
+          {
+            "node": "Save Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Request": {
+      "main": [
+        [
+          {
+            "node": "Send Assessment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Assessment": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "consulting-automation",
+  "tags": ["consulting", "ai-strategy", "assessment", "automation"]
+}

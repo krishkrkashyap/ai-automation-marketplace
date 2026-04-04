@@ -1,0 +1,386 @@
+[
+  {
+    "url": "http://localhost:8080/",
+    "name": "Home",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/services/",
+    "name": "Services List",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/services/bots/",
+    "name": "Bots List",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/",
+    "name": "Industries List",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/automations/",
+    "name": "Automations List",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/pricing/",
+    "name": "Pricing",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/contact/",
+    "name": "Contact",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/case-studies/",
+    "name": "Case Studies",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/services/business-process-automation/",
+    "name": "Service: business-process-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/robotic-process-automation/",
+    "name": "Service: robotic-process-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/ai-chatbot-automation/",
+    "name": "Service: ai-chatbot-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/sales-automation/",
+    "name": "Service: sales-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/marketing-automation/",
+    "name": "Service: marketing-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/customer-support-automation/",
+    "name": "Service: customer-support-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/finance-automation/",
+    "name": "Service: finance-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/hr-automation/",
+    "name": "Service: hr-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/it-devops-automation/",
+    "name": "Service: it-devops-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/data-automation/",
+    "name": "Service: data-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/ai-ml-automation/",
+    "name": "Service: ai-ml-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/document-automation/",
+    "name": "Service: document-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/ecommerce-automation/",
+    "name": "Service: ecommerce-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/manufacturing-automation/",
+    "name": "Service: manufacturing-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/logistics-automation/",
+    "name": "Service: logistics-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/healthcare-automation/",
+    "name": "Service: healthcare-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/banking-automation/",
+    "name": "Service: banking-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/legal-automation/",
+    "name": "Service: legal-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/education-automation/",
+    "name": "Service: education-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/real-estate-automation/",
+    "name": "Service: real-estate-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/media-automation/",
+    "name": "Service: media-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/government-automation/",
+    "name": "Service: government-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/energy-automation/",
+    "name": "Service: energy-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/agriculture-automation/",
+    "name": "Service: agriculture-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/security-fraud-automation/",
+    "name": "Service: security-fraud-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/nocode-lowcode-automation/",
+    "name": "Service: nocode-lowcode-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/fullcode-custom-automation/",
+    "name": "Service: fullcode-custom-automation",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/services/ai-strategy-consulting/",
+    "name": "Service: ai-strategy-consulting",
+    "status": "OK",
+    "has_execute": true
+  },
+  {
+    "url": "http://localhost:8080/industries/ecommerce-automation/",
+    "name": "Industry: ecommerce-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/finance-automation/",
+    "name": "Industry: finance-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/healthcare-automation/",
+    "name": "Industry: healthcare-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/education-automation/",
+    "name": "Industry: education-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/real-estate-automation/",
+    "name": "Industry: real-estate-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/marketing-automation/",
+    "name": "Industry: marketing-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/hr-automation/",
+    "name": "Industry: hr-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/legal-automation/",
+    "name": "Industry: legal-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/manufacturing-automation/",
+    "name": "Industry: manufacturing-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/logistics-supply-chain-automation/",
+    "name": "Industry: logistics-supply-chain-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/banking-fintech-automation/",
+    "name": "Industry: banking-fintech-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/energy-utilities-automation/",
+    "name": "Industry: energy-utilities-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/travel-automation/",
+    "name": "Industry: travel-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/media-creative-automation/",
+    "name": "Industry: media-creative-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/government-automation/",
+    "name": "Industry: government-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/agriculture-automation/",
+    "name": "Industry: agriculture-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/security-automation/",
+    "name": "Industry: security-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/automotive-automation/",
+    "name": "Industry: automotive-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/retail-automation/",
+    "name": "Industry: retail-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/insurance-automation/",
+    "name": "Industry: insurance-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/pharmaceutical-automation/",
+    "name": "Industry: pharmaceutical-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/construction-automation/",
+    "name": "Industry: construction-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/telecommunications-automation/",
+    "name": "Industry: telecommunications-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/food-beverage-automation/",
+    "name": "Industry: food-beverage-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/non-profit-automation/",
+    "name": "Industry: non-profit-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/sports-automation/",
+    "name": "Industry: sports-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/entertainment-automation/",
+    "name": "Industry: entertainment-automation",
+    "status": "OK",
+    "has_execute": false
+  },
+  {
+    "url": "http://localhost:8080/industries/transportation-automation/",
+    "name": "Industry: transportation-automation",
+    "status": "OK",
+    "has_execute": false
+  }
+]

@@ -1,0 +1,242 @@
+{
+  "name": "Healthcare Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "healthcare-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "healthcare-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const appointment = $input.first().json;\nconst symptoms = appointment.symptoms || [];\nconst urgency = {\n  'chest pain': 'emergency',\n  'difficulty breathing': 'emergency',\n  'severe bleeding': 'emergency',\n  'high fever': 'urgent',\n  'moderate pain': 'urgent',\n  'routine checkup': 'normal'\n};\nlet determined_urgency = 'normal';\nsymptoms.forEach(symptom => {\n  const s = symptom.toLowerCase();\n  if (urgency[s] === 'emergency') determined_urgency = 'emergency';\n  else if (urgency[s] === 'urgent' && determined_urgency !== 'emergency') determined_urgency = 'urgent';\n});\nreturn {\n  patient: appointment.patient,\n  appointment_id: appointment.appointment_id,\n  symptoms: symptoms,\n  urgency: determined_urgency,\n  recommended_department: determined_urgency === 'emergency' ? 'emergency' : 'general',\n  estimated_wait_minutes: determined_urgency === 'emergency' ? 5 : determined_urgency === 'urgent' ? 30 : 60\n};"
+      },
+      "id": "triage-patient",
+      "name": "AI Patient Triage",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "urgency-check",
+              "leftValue": "={{ $json.urgency }}",
+              "rightValue": "emergency",
+              "operator": {
+                "type": "string",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-urgency",
+      "name": "IF Emergency",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "table": "appointments",
+        "columns": {
+          "properties": {
+            "appointment_id": "={{ $json.appointment_id }}",
+            "patient_id": "={{ $json.patient.id }}",
+            "urgency": "={{ $json.urgency }}",
+            "department": "={{ $json.recommended_department }}",
+            "status": "scheduled",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "schedule-appointment",
+      "name": "Schedule Appointment",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "appointment-confirmation",
+        "to": "{{ $json.patient.email }}",
+        "subject": "Appointment Confirmed: {{ $json.appointment_id }}",
+        "text": "Your appointment has been scheduled.\n\nAppointment ID: {{ $json.appointment_id }}\nDepartment: {{ $json.recommended_department }}\nEstimated Wait: {{ $json.estimated_wait_minutes }} minutes\n\nPlease arrive 15 minutes early."
+      },
+      "id": "confirm-patient",
+      "name": "Confirm Appointment",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "calendarId": "primary",
+        "eventTitle": "EMERGENCY: {{ $json.patient.name }}",
+        "eventDescription": "Emergency patient: {{ $json.symptoms.join(', ') }}\nUrgency: {{ $json.urgency }}",
+        "eventStart": "{{ $json.appointment_time }}",
+        "eventEnd": "{{ $json.appointment_time_end }}"
+      },
+      "id": "notify-staff",
+      "name": "Notify Medical Staff",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 3,
+      "position": [850, 500],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "google-cred",
+          "name": "Google Calendar"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "healthcare-alerts",
+        "text": "🚨 EMERGENCY CASE\n\nPatient: {{ $json.patient.name }}\nSymptoms: {{ $json.symptoms.join(', ') }}\nDepartment: {{ $json.recommended_department }}",
+        "options": {}
+      },
+      "id": "slack-alert",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1050, 500],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Patient Triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Patient Triage": {
+      "main": [
+        [
+          {
+            "node": "IF Emergency",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Emergency": {
+      "main": [
+        [
+          {
+            "node": "Schedule Appointment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Medical Staff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Appointment": {
+      "main": [
+        [
+          {
+            "node": "Confirm Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Appointment": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Medical Staff": {
+      "main": [
+        [
+          {
+            "node": "Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Alert": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "healthcare-automation",
+  "tags": ["healthcare", "patient-triage", "appointments", "automation"]
+}

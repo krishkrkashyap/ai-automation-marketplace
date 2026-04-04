@@ -1,5 +1,6 @@
 # Extended views.py with all industries and bots
 from django.shortcuts import render
+from pages.automations_data import AUTOMATIONS
 from django.http import Http404
 
 INDUSTRIES = [
@@ -34,16 +35,34 @@ INDUSTRIES = [
 ]
 
 SERVICES = [
-    {'name': 'AI Chatbots', 'description': 'Intelligent conversational agents', 'icon': 'fas fa-comments', 'url': '/services/ai-chatbots/'},
-    {'name': 'RPA Solutions', 'description': 'Robotic process automation', 'icon': 'fas fa-robot', 'url': '/services/rpa/'},
+    {'name': 'Business Process Automation', 'description': 'Streamline workflows and business processes', 'icon': 'fas fa-cogs', 'url': '/services/business-process-automation/'},
+    {'name': 'RPA Solutions', 'description': 'Robotic process automation', 'icon': 'fas fa-robot', 'url': '/services/robotic-process-automation/'},
+    {'name': 'AI Chatbots', 'description': 'Intelligent conversational agents', 'icon': 'fas fa-comments', 'url': '/services/ai-chatbot-automation/'},
     {'name': 'Sales Automation', 'description': 'Automate sales pipeline', 'icon': 'fas fa-chart-line', 'url': '/services/sales-automation/'},
     {'name': 'Marketing Automation', 'description': 'Streamline marketing campaigns', 'icon': 'fas fa-bullhorn', 'url': '/services/marketing-automation/'},
-    {'name': 'Finance Automation', 'description': 'Automate invoicing', 'icon': 'fas fa-file-invoice-dollar', 'url': '/services/finance-automation/'},
-    {'name': 'Data Automation', 'description': 'ETL and data processing', 'icon': 'fas fa-database', 'url': '/services/data-automation/'},
     {'name': 'Customer Support', 'description': 'AI support automation', 'icon': 'fas fa-headset', 'url': '/services/customer-support-automation/'},
+    {'name': 'Finance Automation', 'description': 'Automate invoicing', 'icon': 'fas fa-file-invoice-dollar', 'url': '/services/finance-automation/'},
     {'name': 'HR Automation', 'description': 'Workforce management', 'icon': 'fas fa-users', 'url': '/services/hr-automation/'},
     {'name': 'IT DevOps', 'description': 'Infrastructure automation', 'icon': 'fas fa-server', 'url': '/services/it-devops-automation/'},
+    {'name': 'Data Automation', 'description': 'ETL and data processing', 'icon': 'fas fa-database', 'url': '/services/data-automation/'},
+    {'name': 'AI & ML Automation', 'description': 'Machine learning automation', 'icon': 'fas fa-brain', 'url': '/services/ai-ml-automation/'},
     {'name': 'Document Automation', 'description': 'Document processing', 'icon': 'fas fa-file-alt', 'url': '/services/document-automation/'},
+    {'name': 'E-Commerce Automation', 'description': 'Online store automation', 'icon': 'fas fa-shopping-cart', 'url': '/services/ecommerce-automation/'},
+    {'name': 'Manufacturing Automation', 'description': 'Production automation', 'icon': 'fas fa-industry', 'url': '/services/manufacturing-automation/'},
+    {'name': 'Logistics Automation', 'description': 'Supply chain automation', 'icon': 'fas fa-truck', 'url': '/services/logistics-automation/'},
+    {'name': 'Healthcare Automation', 'description': 'Medical automation', 'icon': 'fas fa-heartbeat', 'url': '/services/healthcare-automation/'},
+    {'name': 'Banking Automation', 'description': 'Financial automation', 'icon': 'fas fa-university', 'url': '/services/banking-automation/'},
+    {'name': 'Legal Automation', 'description': 'Legal process automation', 'icon': 'fas fa-gavel', 'url': '/services/legal-automation/'},
+    {'name': 'Education Automation', 'description': 'Educational automation', 'icon': 'fas fa-graduation-cap', 'url': '/services/education-automation/'},
+    {'name': 'Real Estate Automation', 'description': 'Property automation', 'icon': 'fas fa-home', 'url': '/services/real-estate-automation/'},
+    {'name': 'Media Automation', 'description': 'Content automation', 'icon': 'fas fa-video', 'url': '/services/media-automation/'},
+    {'name': 'Government Automation', 'description': 'Public sector automation', 'icon': 'fas fa-landmark', 'url': '/services/government-automation/'},
+    {'name': 'Energy Automation', 'description': 'Utilities automation', 'icon': 'fas fa-bolt', 'url': '/services/energy-automation/'},
+    {'name': 'Agriculture Automation', 'description': 'Farming automation', 'icon': 'fas fa-seedling', 'url': '/services/agriculture-automation/'},
+    {'name': 'Security & Fraud Automation', 'description': 'Security automation', 'icon': 'fas fa-shield-alt', 'url': '/services/security-fraud-automation/'},
+    {'name': 'No-Code/Low-Code Automation', 'description': 'No-code automation', 'icon': 'fas fa-code', 'url': '/services/nocode-lowcode-automation/'},
+    {'name': 'Full-Code Custom Automation', 'description': 'Custom development', 'icon': 'fas fa-laptop-code', 'url': '/services/fullcode-custom-automation/'},
+    {'name': 'AI Strategy Consulting', 'description': 'AI strategy consulting', 'icon': 'fas fa-chess-king', 'url': '/services/ai-strategy-consulting/'},
 ]
 
 BOTS = [
@@ -211,6 +230,66 @@ INDUSTRY_DATA = {
         'solutions': ['AI manufacturing automation', 'Smart inventory management', 'AI customer service', 'Quality inspection automation', 'Supply chain optimization'],
         'bots': []
     },
+    'retail-automation': {
+        'name': 'Retail Automation', 'icon': 'Retail', 'description': 'Revolutionize retail operations with AI automation. Automate inventory, customer service, and sales forecasting.',
+        'problems': ['Inventory management challenges', 'Customer service bottlenecks', 'Sales forecasting inaccuracies', 'Staff scheduling inefficiencies', 'Loss prevention'],
+        'solutions': ['AI inventory management', 'Smart customer service', 'Sales forecasting AI', 'Automated staff scheduling', 'Loss prevention automation'],
+        'bots': ['inventory-prediction-bot', 'customer-support-bot']
+    },
+    'insurance-automation': {
+        'name': 'Insurance Automation', 'icon': 'Insurance', 'description': 'Transform insurance operations with AI automation. Automate claims processing, underwriting, and customer service.',
+        'problems': ['Manual claims processing', 'Slow underwriting', 'Customer service delays', 'Fraud detection challenges', 'Policy management overhead'],
+        'solutions': ['AI claims processing', 'Automated underwriting', 'Customer service automation', 'Fraud detection AI', 'Policy management automation'],
+        'bots': ['claim-processing-bot', 'insurance-fraud-bot']
+    },
+    'pharmaceutical-automation': {
+        'name': 'Pharmaceutical Automation', 'icon': 'Pharmaceutical', 'description': 'Optimize pharmaceutical operations with AI automation. Automate drug discovery, inventory, and compliance.',
+        'problems': ['Drug discovery delays', 'Inventory management challenges', 'Compliance tracking', 'Regulatory reporting', 'Supply chain complexities'],
+        'solutions': ['AI drug discovery', 'Smart inventory management', 'Compliance automation', 'Regulatory reporting AI', 'Supply chain optimization'],
+        'bots': []
+    },
+    'construction-automation': {
+        'name': 'Construction Automation', 'icon': 'Construction', 'description': 'Modernize construction with AI automation. Automate project management, safety monitoring, and resource allocation.',
+        'problems': ['Project delays', 'Resource allocation inefficiencies', 'Safety monitoring challenges', 'Cost overruns', 'Equipment management'],
+        'solutions': ['AI project management', 'Resource optimization', 'Safety monitoring AI', 'Cost control automation', 'Equipment tracking automation'],
+        'bots': []
+    },
+    'telecommunications-automation': {
+        'name': 'Telecommunications Automation', 'icon': 'Telecommunications', 'description': 'Transform telecom operations with AI automation. Automate network management, customer service, and billing.',
+        'problems': ['Network outages', 'Customer service delays', 'Billing complexities', 'Service provisioning', 'Fraud detection'],
+        'solutions': ['AI network monitoring', 'Customer service automation', 'Billing automation', 'Service provisioning AI', 'Fraud detection automation'],
+        'bots': ['customer-support-bot', 'fraud-detection-bot']
+    },
+    'food-beverage-automation': {
+        'name': 'Food and Beverage Automation', 'icon': 'Food and Beverage', 'description': 'Optimize food and beverage operations with AI automation. Automate inventory, quality control, and supply chain.',
+        'problems': ['Inventory spoilage', 'Quality control challenges', 'Supply chain disruptions', 'Demand forecasting', 'Compliance requirements'],
+        'solutions': ['AI inventory management', 'Quality control automation', 'Supply chain optimization', 'Demand forecasting AI', 'Compliance automation'],
+        'bots': ['inventory-prediction-bot']
+    },
+    'non-profit-automation': {
+        'name': 'Non-Profit Automation', 'icon': 'Non-Profit', 'description': 'Empower non-profit organizations with AI automation. Automate donor management, volunteer coordination, and fundraising.',
+        'problems': ['Donor management challenges', 'Volunteer coordination', 'Fundraising inefficiencies', 'Grant management', 'Impact tracking'],
+        'solutions': ['AI donor management', 'Volunteer coordination automation', 'Fundraising automation', 'Grant management AI', 'Impact tracking automation'],
+        'bots': []
+    },
+    'sports-automation': {
+        'name': 'Sports Automation', 'icon': 'Sports', 'description': 'Transform sports operations with AI automation. Automate fan engagement, ticket sales, and performance analysis.',
+        'problems': ['Fan engagement challenges', 'Ticket sales inefficiencies', 'Performance analysis delays', 'Athlete management', 'Schedule conflicts'],
+        'solutions': ['AI fan engagement', 'Ticket sales automation', 'Performance analytics', 'Athlete management AI', 'Schedule optimization'],
+        'bots': []
+    },
+    'entertainment-automation': {
+        'name': 'Entertainment Automation', 'icon': 'Entertainment', 'description': 'Revolutionize entertainment with AI automation. Automate content creation, audience analytics, and distribution.',
+        'problems': ['Content creation bottlenecks', 'Audience analytics challenges', 'Distribution delays', 'Content recommendations', 'Rights management'],
+        'solutions': ['AI content generation', 'Audience analytics', 'Distribution automation', 'Content recommendation AI', 'Rights management automation'],
+        'bots': ['content-generation-bot']
+    },
+    'transportation-automation': {
+        'name': 'Transportation Automation', 'icon': 'Transportation', 'description': 'Optimize transportation with AI automation. Automate fleet management, route planning, and driver coordination.',
+        'problems': ['Fleet management challenges', 'Route planning inefficiencies', 'Driver coordination', 'Fuel costs', 'Compliance requirements'],
+        'solutions': ['AI fleet management', 'Route optimization', 'Driver coordination automation', 'Fuel optimization AI', 'Compliance automation'],
+        'bots': ['route-optimization-bot', 'supply-chain-bot']
+    },
 }
 
 BOTS_DATA = {
@@ -303,16 +382,27 @@ def industries_list(request):
     return render(request, 'pages/industries_list.html', {'industries': INDUSTRIES})
 
 def industry_detail(request, industry_slug):
-    if industry_slug not in INDUSTRY_DATA:
-        raise Http404("Industry not found")
-    industry = INDUSTRY_DATA[industry_slug]
+    # First check INDUSTRY_DATA, then fall back to AUTOMATIONS
+    if industry_slug in INDUSTRY_DATA:
+        industry = INDUSTRY_DATA[industry_slug]
+    else:
+        automation = next((a for a in AUTOMATIONS if a['slug'] == industry_slug), None)
+        if not automation:
+            raise Http404("Industry not found")
+        industry = automation
     return render(request, 'pages/industry_detail.html', {'industry': industry, 'slug': industry_slug})
 
 def services_list(request):
     return render(request, 'pages/services_list.html', {'services': SERVICES})
 
+def bots_list(request):
+    return render(request, 'pages/bots_list.html', {'bots': BOTS})
+
 def service_detail(request, service_slug):
-    return render(request, 'pages/service_detail.html', {'slug': service_slug})
+    automation = next((a for a in AUTOMATIONS if a['slug'] == service_slug), None)
+    if not automation:
+        return render(request, 'pages/service_detail.html', {'slug': service_slug})
+    return render(request, 'pages/automation_detail.html', {'automation': automation, 'slug': service_slug})
 
 def bot_detail(request, bot_slug):
     if bot_slug not in BOTS_DATA:
@@ -333,6 +423,25 @@ def pricing(request):
 
 def contact(request):
     return render(request, 'pages/contact.html')
+
+def about(request):
+    team = [
+        {'name': 'Mr Krish Kumar', 'role': 'CEO', 'description': 'Visionary leader with 15+ years in AI and automation. Pioneered digital transformation for 500+ enterprises.', 'image': '🤵'},
+        {'name': 'Abhishek Kumar Gupta', 'role': 'CTO', 'description': 'Tech architect expert in n8n, AI/ML, and enterprise automation. Built scalable systems processing 10M+ requests daily.', 'image': '👨‍💻'},
+    ]
+    stats = [
+        {'value': '500+', 'label': 'Enterprise Clients'},
+        {'value': '28', 'label': 'Automation Categories'},
+        {'value': '10M+', 'label': 'Daily API Calls'},
+        {'value': '99.9%', 'label': 'Uptime SLA'},
+    ]
+    return render(request, 'pages/about.html', {'team': team, 'stats': stats})
+
+def privacy(request):
+    return render(request, 'pages/privacy.html')
+
+def terms(request):
+    return render(request, 'pages/terms.html')
 
 def case_study_detail(request, slug):
     return render(request, 'pages/case_study_detail.html', {'slug': slug})
@@ -372,3 +481,12 @@ def search(request):
             if query in bot['name'].lower():
                 results['bots'].append(bot)
     return render(request, 'pages/search.html', {'query': query, 'results': results})
+
+def automation_list(request):
+    return render(request, 'pages/automation_list.html', {'automations': AUTOMATIONS})
+
+def automation_detail(request, automation_slug):
+    automation = next((a for a in AUTOMATIONS if a['slug'] == automation_slug), None)
+    if not automation:
+        raise Http404("Automation not found")
+    return render(request, 'pages/automation_detail.html', {'automation': automation, 'slug': automation_slug})

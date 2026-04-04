@@ -1,0 +1,183 @@
+{
+  "name": "AI & Machine Learning Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-ml-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "ai-ml-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const { model_name, input_data, task_type } = $input.first().json;\nconst taskConfig = {\n  'text-generation': { max_tokens: 500, temperature: 0.7 },\n  'summarization': { max_tokens: 300, temperature: 0.5 },\n  'classification': { max_tokens: 100, temperature: 0.3 },\n  'translation': { max_tokens: 500, temperature: 0.5 }\n};\nconst config = taskConfig[task_type] || taskConfig['text-generation'];\nreturn {\n  model: model_name || 'gpt-4',\n  input: input_data,\n  task: task_type,\n  params: config,\n  request_id: `req_${Date.now()}`,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "prepare-request",
+      "name": "Prepare Model Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.openai.com/v1/chat/completions",
+        "method": "POST",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "={{ $json.model }}"
+            },
+            {
+              "name": "messages",
+              "value": "[{\"role\": \"user\", \"content\": \"{{ $json.input }}\"}]"
+            },
+            {
+              "name": "max_tokens",
+              "value": "={{ $json.params.max_tokens }}"
+            },
+            {
+              "name": "temperature",
+              "value": "={{ $json.params.temperature }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "call-openai",
+      "name": "Call OpenAI API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [650, 300],
+      "credentials": {
+        "openaiApi": {
+          "id": "openai-cred",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json.choices?.[0]?.message?.content || '';\nconst result = {\n  request_id: $input.first().json.request_id,\n  output: response,\n  task: $input.first().json.task,\n  model: $input.first().json.model,\n  tokens_used: $input.first().json.usage?.total_tokens || 0,\n  status: 'success',\n  completed_at: new Date().toISOString()\n};\nreturn result;"
+      },
+      "id": "parse-response",
+      "name": "Parse Model Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "ml_requests",
+        "columns": {
+          "properties": {
+            "request_id": "={{ $json.request_id }}",
+            "task": "={{ $json.task }}",
+            "model": "={{ $json.model }}",
+            "input": "={{ $json.input }}",
+            "output": "={{ $json.output }}",
+            "tokens_used": "={{ $json.tokens_used }}",
+            "status": "={{ $json.status }}",
+            "created_at": "={{ $json.completed_at }}"
+          }
+        }
+      },
+      "id": "log-request",
+      "name": "Log to Database",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Model Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Model Request": {
+      "main": [
+        [
+          {
+            "node": "Call OpenAI API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call OpenAI API": {
+      "main": [
+        [
+          {
+            "node": "Parse Model Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Model Response": {
+      "main": [
+        [
+          {
+            "node": "Log to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Database": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "ai-ml-automation",
+  "tags": ["ai", "ml", "llm", "automation"]
+}

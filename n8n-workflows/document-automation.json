@@ -1,0 +1,222 @@
+{
+  "name": "Document & Content Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "document-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "document-001"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "binaryPropertyName": "document",
+        "options": {}
+      },
+      "id": "read-document",
+      "name": "Read Document",
+      "type": "n8n-nodes-base.readBinaryFiles",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { doc_type, content } = $input.first().json;\nconst classifiers = {\n  'invoice': ['invoice', 'bill', 'amount due', 'payment'],\n  'contract': ['agreement', 'terms', 'parties', 'signature'],\n  'receipt': ['receipt', ' purchased', 'total'],\n  'report': ['report', 'summary', 'analysis', 'findings']\n};\nlet detected_type = 'unknown';\nconst lowerContent = content.toLowerCase();\nObject.keys(classifiers).forEach(type => {\n  const matches = classifiers[type].filter(keyword => lowerContent.includes(keyword));\n  if (matches.length > detected_type.length) {\n    detected_type = type;\n  }\n});\nreturn { document_type: detected_type, original_type: doc_type, confidence: 0.85 };"
+      },
+      "id": "classify-doc",
+      "name": "Classify Document",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "type-check",
+              "leftValue": "={{ $json.document_type }}",
+              "rightValue": "invoice",
+              "operator": {
+                "type": "string",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-type",
+      "name": "IF Invoice",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "extract",
+        "binaryPropertyName": "document",
+        "output": "json",
+        "options": {}
+      },
+      "id": "extract-invoice",
+      "name": "Extract Invoice Data",
+      "type": "n8n-nodes-base.extractFromPdf",
+      "typeVersion": 1,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "table": "documents",
+        "columns": {
+          "properties": {
+            "document_type": "={{ $json.document_type }}",
+            "content": "={{ $json.content }}",
+            "status": "processed",
+            "processed_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "store-doc",
+      "name": "Store Document",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "document-processed",
+        "to": "{{ $json.notification_email }}",
+        "subject": "✅ Document Processed: {{ $json.document_type }}",
+        "text": "Your document has been processed.\n\nType: {{ $json.document_type }}\nConfidence: {{ $json.confidence }}\n\nDocument ID: {{ $json.document_id }}"
+      },
+      "id": "notify-user",
+      "name": "Notify User",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1450, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Document": {
+      "main": [
+        [
+          {
+            "node": "Classify Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Document": {
+      "main": [
+        [
+          {
+            "node": "IF Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Invoice": {
+      "main": [
+        [
+          {
+            "node": "Extract Invoice Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Invoice Data": {
+      "main": [
+        [
+          {
+            "node": "Store Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Document": {
+      "main": [
+        [
+          {
+            "node": "Notify User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify User": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "document-automation",
+  "tags": ["document", "ocr", "classification", "automation"]
+}

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us | AI Automation Marketplace{% endblock %}
+
+{% block meta_description %}Learn about AI Automation Marketplace - leading provider of AI-powered automation solutions for businesses. Meet our leadership team.{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 dark:from-blue-950 dark:via-blue-900 dark:to-indigo-950 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">About Us</h1>
+        <p class="text-xl text-blue-100 max-w-2xl mx-auto">Empowering businesses with intelligent automation since 2020</p>
+    </div>
+</section>
+
+<section class="py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {% for stat in stats %}
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg text-center">
+                <div class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2" style="color: var(--primary-color)">{{ stat.value }}</div>
+                <div class="text-gray-600 dark:text-gray-300">{{ stat.label }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Our Story</h2>
+            <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300">
+                <p class="mb-4">AI Automation Marketplace was founded with a simple mission: to make enterprise-grade automation accessible to businesses of all sizes. We believe that every organization deserves powerful AI tools to streamline operations, reduce costs, and focus on what matters most.</p>
+                
+                <p class="mb-4">Our platform combines cutting-edge AI technologies with intuitive workflows powered by n8n, enabling organizations to automate complex processes without requiring deep technical expertise. From intelligent chatbots to predictive analytics, we provide comprehensive solutions across 28 automation categories.</p>
+                
+                <p class="mb-4">Today, we serve over 500 enterprise clients across industries ranging from healthcare and finance to manufacturing and retail. Our team of experts continues to innovate, developing new automation solutions that help businesses transform their operations and achieve measurable results.</p>
+                
+                <p>We're committed to pushing the boundaries of what's possible with AI automation, while maintaining our focus on simplicity, reliability, and customer success.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">Our Leadership</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {% for member in team %}
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+                <div class="flex items-center mb-4">
+                    <div class="w-20 h-20 rounded-full flex items-center justify-center text-4xl mr-4" style="background-color: var(--primary-color)">
+                        {{ member.image }}
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ member.name }}</h3>
+                        <p class="text-gray-600 dark:text-gray-400" style="color: var(--primary-color)">{{ member.role }}</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300">{{ member.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">Our Values</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="p-6">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4" style="background-color: var(--primary-color)">
+                    <i class="fas fa-lightbulb text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Innovation</h3>
+                <p class="text-gray-600 dark:text-gray-300">We continuously push the boundaries of AI and automation technology to deliver cutting-edge solutions.</p>
+            </div>
+            <div class="p-6">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4" style="background-color: var(--primary-color)">
+                    <i class="fas fa-handshake text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Reliability</h3>
+                <p class="text-gray-600 dark:text-gray-300">Our 99.9% uptime SLA and robust infrastructure ensure your automation runs smoothly.</p>
+            </div>
+            <div class="p-6">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4" style="background-color: var(--primary-color)">
+                    <i class="fas fa-users text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Customer Success</h3>
+                <p class="text-gray-600 dark:text-gray-300">Your success is our success. We're dedicated to helping you achieve measurable results.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

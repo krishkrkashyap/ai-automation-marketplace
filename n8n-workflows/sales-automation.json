@@ -1,0 +1,192 @@
+{
+  "name": "Sales Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sales-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "sales-001"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "score-check",
+              "leftValue": "={{ $json.lead_score }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-score",
+      "name": "IF High Score",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "name": "CRM Deal",
+        "properties": {
+          "fields": {
+            "properties": {
+              "title": "={{ $json.company }} - New Lead",
+              "value": "={{ $json.lead_value }}",
+              "pipeline": "sales-pipeline",
+              "stage": "qualified"
+            }
+          }
+        }
+      },
+      "id": "create-deal",
+      "name": "Create CRM Deal",
+      "type": "n8n-nodes-base.pipedrive",
+      "typeVersion": 1,
+      "position": [650, 200],
+      "credentials": {
+        "pipedriveApi": {
+          "id": "pipedrive-cred",
+          "name": "Pipedrive API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "new-lead-notification",
+        "to": "{{ $json.owner_email }}",
+        "subject": "🔥 Hot Lead: {{ $json.company }}",
+        "text": "New lead detected!\n\nCompany: {{ $json.company }}\nContact: {{ $json.name }}\nScore: {{ $json.lead_score }}\n\nAct fast!"
+      },
+      "id": "notify-sales",
+      "name": "Notify Sales Team",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [650, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "calendarId": "primary",
+        "eventTitle": "Follow-up with {{ $json.company }}",
+        "eventDescription": "Lead follow-up scheduled.\n\nCompany: {{ $json.company }}\nContact: {{ $json.name }}\nScore: {{ $json.lead_score }}",
+        "eventStart": "{{ $json.follow_up_time }}",
+        "eventEnd": "{{ $json.follow_up_time_end }}"
+      },
+      "id": "schedule-followup",
+      "name": "Schedule Follow-up",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 3,
+      "position": [850, 300],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "google-cred",
+          "name": "Google Calendar"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "IF High Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF High Score": {
+      "main": [
+        [
+          {
+            "node": "Create CRM Deal",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Sales Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create CRM Deal": {
+      "main": [
+        [
+          {
+            "node": "Schedule Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Sales Team": {
+      "main": [
+        [
+          {
+            "node": "Schedule Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Follow-up": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "sales-automation",
+  "tags": ["sales", "crm", "automation"]
+}

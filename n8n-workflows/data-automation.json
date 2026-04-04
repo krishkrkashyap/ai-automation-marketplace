@@ -1,0 +1,259 @@
+{
+  "name": "Data Automation & Intelligence",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.data_source_url }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "fetch-data",
+      "name": "Fetch Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst data = Array.isArray(raw) ? raw : [raw];\nconst cleaned = data.map(item => {\n  const cleaned = {};\n  Object.keys(item).forEach(key => {\n    const value = item[key];\n    if (value === null || value === undefined || value === '') {\n      cleaned[key] = null;\n    } else if (typeof value === 'string') {\n      cleaned[key] = value.trim();\n    } else {\n      cleaned[key] = value;\n    }\n  });\n  return cleaned;\n});\nreturn { data: cleaned, row_count: cleaned.length };"
+      },
+      "id": "clean-data",
+      "name": "Clean & Transform Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json.data;\nconst stats = {\n  total_rows: data.length,\n  columns: data.length > 0 ? Object.keys(data[0]) : [],\n  null_counts: {},\n  numeric_stats: {}\n};\ndata.forEach(row => {\n  Object.keys(row).forEach(col => {\n    if (row[col] === null) {\n      stats.null_counts[col] = (stats.null_counts[col] || 0) + 1;\n    }\n  });\n});\ndata[0] && Object.keys(data[0]).forEach(col => {\n  const values = data.map(r => r[col]).filter(v => typeof v === 'number');\n  if (values.length > 0) {\n    stats.numeric_stats[col] = {\n      min: Math.min(...values),\n      max: Math.max(...values),\n      avg: values.reduce((a, b) => a + b, 0) / values.length\n    };\n  }\n});\nreturn stats;"
+      },
+      "id": "validate-data",
+      "name": "Validate Data Quality",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "quality-check",
+              "leftValue": "={{ $json.null_counts }}",
+              "rightValue": "{}",
+              "operator": {
+                "type": "object",
+                "operation": "notEqual"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-quality",
+      "name": "IF Quality Issues",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "data_quality_logs",
+        "columns": {
+          "properties": {
+            "check_date": "={{ $now.toISO() }}",
+            "total_rows": "={{ $json.total_rows }}",
+            "null_counts": "={{ JSON.stringify($json.null_counts) }}",
+            "status": "issues_found"
+          }
+        }
+      },
+      "id": "log-issues",
+      "name": "Log Quality Issues",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1250, 400],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "data-quality-alert",
+        "to": "{{ $json.alerts_email }}",
+        "subject": "⚠️ Data Quality Issues Detected",
+        "text": "Data quality issues found in {{ $json.data_source }}.\n\nTotal Rows: {{ $json.total_rows }}\nNull Counts: {{ $json.null_counts }}\n\nPlease review the data."
+      },
+      "id": "alert-email",
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1450, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "processed_data",
+        "columns": {
+          "properties": {
+            "data": "={{ JSON.stringify($json.data) }}",
+            "processed_at": "={{ $now.toISO() }}",
+            "source": "={{ $json.data_source }}"
+          }
+        }
+      },
+      "id": "store-data",
+      "name": "Store Processed Data",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1250, 200],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "data-engineering",
+        "text": "✅ Data processed: {{ $json.row_count }} rows from {{ $json.data_source }}",
+        "options": {}
+      },
+      "id": "notify-success",
+      "name": "Notify Success",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1450, 200],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Data": {
+      "main": [
+        [
+          {
+            "node": "Clean & Transform Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean & Transform Data": {
+      "main": [
+        [
+          {
+            "node": "Validate Data Quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Data Quality": {
+      "main": [
+        [
+          {
+            "node": "IF Quality Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Quality Issues": {
+      "main": [
+        [
+          {
+            "node": "Store Processed Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Quality Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Quality Issues": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Processed Data": {
+      "main": [
+        [
+          {
+            "node": "Notify Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "data-automation",
+  "tags": ["data", "etl", "analytics", "automation"]
+}

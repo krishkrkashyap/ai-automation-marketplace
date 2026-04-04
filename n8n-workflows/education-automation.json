@@ -1,0 +1,139 @@
+{
+  "name": "Education & EdTech Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "education-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "education-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const submission = $input.first().json;\nconst answers = submission.answers || [];\nconst totalPoints = answers.reduce((sum, a) => sum + (a.points || 0), 0);\nconst maxPoints = answers.reduce((sum, a) => sum + (a.max_points || 10), 0);\nconst percentage = (totalPoints / maxPoints) * 100;\nlet grade = 'F';\nif (percentage >= 90) grade = 'A';\nelse if (percentage >= 80) grade = 'B';\nelse if (percentage >= 70) grade = 'C';\nelse if (percentage >= 60) grade = 'D';\nreturn {\n  submission_id: submission.submission_id,\n  student_id: submission.student_id,\n  total_points: totalPoints,\n  max_points: maxPoints,\n  percentage: Math.round(percentage),\n  grade: grade,\n  feedback: percentage >= 70 ? 'Great job!' : 'Please review the material and resubmit.'\n};"
+      },
+      "id": "grade-submission",
+      "name": "Auto-Grade Submission",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "grades",
+        "columns": {
+          "properties": {
+            "submission_id": "={{ $json.submission_id }}",
+            "student_id": "={{ $json.student_id }}",
+            "grade": "={{ $json.grade }}",
+            "percentage": "={{ $json.percentage }}",
+            "feedback": "={{ $json.feedback }}",
+            "graded_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "save-grade",
+      "name": "Save Grade",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "grade-notification",
+        "to": "{{ $json.student_email }}",
+        "subject": "Your Grade: {{ $json.grade }} - {{ $json.percentage }}%",
+        "text": "Your assignment has been graded.\n\nGrade: {{ $json.grade }}\nScore: {{ $json.total_points }}/{{ $json.max_points }}\nPercentage: {{ $json.percentage }}%\n\nFeedback: {{ $json.feedback }}"
+      },
+      "id": "notify-student",
+      "name": "Notify Student",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Auto-Grade Submission",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Grade Submission": {
+      "main": [
+        [
+          {
+            "node": "Save Grade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Grade": {
+      "main": [
+        [
+          {
+            "node": "Notify Student",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Student": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "education-automation",
+  "tags": ["education", "edtech", "grading", "automation"]
+}

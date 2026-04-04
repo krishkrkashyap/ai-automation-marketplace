@@ -1,0 +1,276 @@
+{
+  "name": "HR & Workforce Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hr-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "hr-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resume = $input.first().json.resume_text;\nconst skills = ['python', 'javascript', 'java', 'react', 'node', 'aws', 'docker', 'kubernetes', 'sql', 'machine learning'];\nconst foundSkills = skills.filter(s => resume.toLowerCase().includes(s));\nconst experience = (resume.match(/\\d+\\s+years/gi) || []).map(m => parseInt(m.split(' ')[0]));\nconst avgExp = experience.length > 0 ? experience.reduce((a, b) => a + b, 0) / experience.length : 0;\nconst score = Math.min(100, Math.round(avgExp * 10 + foundSkills.length * 10));\nreturn {\n  candidate: $input.first().json,\n  skills_matched: foundSkills,\n  experience_years: avgExp,\n  fit_score: score,\n  recommendation: score >= 70 ? 'interview' : 'rejected'\n};"
+      },
+      "id": "analyze-resume",
+      "name": "AI Resume Screening",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "score-check",
+              "leftValue": "={{ $json.fit_score }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-score",
+      "name": "IF Qualified",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "name": "Candidate in ATS",
+        "properties": {
+          "fields": {
+            "properties": {
+              "name": "={{ $json.candidate.name }}",
+              "email": "={{ $json.candidate.email }}",
+              "position": "={{ $json.candidate.position }}",
+              "status": "qualified",
+              "score": "={{ $json.fit_score }}"
+            }
+          }
+        }
+      },
+      "id": "add-ats",
+      "name": "Add to ATS",
+      "type": "n8n-nodes-base.pipedrive",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "credentials": {
+        "pipedriveApi": {
+          "id": "pipedrive-cred",
+          "name": "Pipedrive API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "calendarId": "primary",
+        "eventTitle": "Interview: {{ $json.candidate.name }}",
+        "eventDescription": "Candidate for {{ $json.candidate.position }}\n\nScore: {{ $json.fit_score }}\nSkills: {{ $json.skills_matched.join(', ') }}",
+        "eventStart": "{{ $json.interview_time }}",
+        "eventEnd": "{{ $json.interview_time_end }}"
+      },
+      "id": "schedule-interview",
+      "name": "Schedule Interview",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 3,
+      "position": [1050, 200],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "google-cred",
+          "name": "Google Calendar"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "application-update",
+        "to": "{{ $json.candidate.email }}",
+        "subject": "Update on your application - {{ $json.candidate.position }}",
+        "text": "Dear {{ $json.candidate.name }},\n\nThank you for applying to the {{ $json.candidate.position }} position.\n\nAfter reviewing your application, we're excited to invite you for an interview!\n\nBest regards,\nHR Team"
+      },
+      "id": "send-interview-invite",
+      "name": "Send Interview Invite",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1250, 200],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "application-rejection",
+        "to": "{{ $json.candidate.email }}",
+        "subject": "Your application to {{ $json.candidate.position }}",
+        "text": "Dear {{ $json.candidate.name }},\n\nThank you for your interest in the {{ $json.candidate.position }} position.\n\nAfter careful consideration, we've decided to move forward with other candidates.\n\nWe wish you the best in your job search.\n\nBest regards,\nHR Team"
+      },
+      "id": "send-rejection",
+      "name": "Send Rejection",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "hr-notification",
+        "to": "{{ $json.hr_email }}",
+        "subject": "New Candidate: {{ $json.candidate.name }} - Score: {{ $json.fit_score }}",
+        "text": "New candidate screened.\n\nName: {{ $json.candidate.name }}\nPosition: {{ $json.candidate.position }}\nScore: {{ $json.fit_score }}\nSkills: {{ $json.skills_matched.join(', ') }}\n\nRecommendation: {{ $json.recommendation }}"
+      },
+      "id": "notify-hr",
+      "name": "Notify HR Team",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Resume Screening",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Resume Screening": {
+      "main": [
+        [
+          {
+            "node": "IF Qualified",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Qualified": {
+      "main": [
+        [
+          {
+            "node": "Add to ATS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Rejection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to ATS": {
+      "main": [
+        [
+          {
+            "node": "Schedule Interview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Interview": {
+      "main": [
+        [
+          {
+            "node": "Send Interview Invite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Interview Invite": {
+      "main": [
+        [
+          {
+            "node": "Notify HR Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Rejection": {
+      "main": [
+        [
+          {
+            "node": "Notify HR Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify HR Team": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "hr-automation",
+  "tags": ["hr", "recruitment", "resume", "automation"]
+}

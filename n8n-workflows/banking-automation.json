@@ -1,0 +1,269 @@
+{
+  "name": "Banking & Fintech Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "banking-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "banking-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const transaction = $input.first().json;\nconst amount = parseFloat(transaction.amount) || 0;\nconst riskFactors = [];\nif (amount > 10000) riskFactors.push('high_amount');\nif (transaction.velocity > 5) riskFactors.push('high_velocity');\nif (!transaction.location?.verified) riskFactors.push('unverified_location');\nif (transaction.time_hour < 6 || transaction.time_hour > 22) riskFactors.push('off_hours');\nconst riskScore = Math.min(100, riskFactors.length * 25);\nconst decision = riskScore >= 50 ? 'review' : riskScore >= 75 ? 'block' : 'approve';\nreturn {\n  transaction_id: transaction.transaction_id,\n  amount: amount,\n  risk_factors: riskFactors,\n  risk_score: riskScore,\n  decision: decision,\n  customer_id: transaction.customer_id\n};"
+      },
+      "id": "assess-risk",
+      "name": "AI Risk Assessment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "decision-check",
+              "leftValue": "={{ $json.decision }}",
+              "rightValue": "approve",
+              "operator": {
+                "type": "string",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-decision",
+      "name": "IF Approved",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "table": "transactions",
+        "columns": {
+          "properties": {
+            "transaction_id": "={{ $json.transaction_id }}",
+            "amount": "={{ $json.amount }}",
+            "risk_score": "={{ $json.risk_score }}",
+            "decision": "={{ $json.decision }}",
+            "status": "approved",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "log-transaction",
+      "name": "Log Transaction",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.stripe.com/v1/charges",
+        "method": "POST",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "amount",
+              "value": "={{ $json.amount * 100 }}"
+            },
+            {
+              "name": "currency",
+              "value": "usd"
+            },
+            {
+              "name": "customer",
+              "value": "={{ $json.customer_id }}"
+            }
+          ]
+        }
+      },
+      "id": "process-payment",
+      "name": "Process Payment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 200],
+      "credentials": {
+        "stripeApi": {
+          "id": "stripe-cred",
+          "name": "Stripe API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "transaction-review",
+        "to": "{{ $json.compliance_email }}",
+        "subject": "⚠️ Transaction Review Required: {{ $json.transaction_id }}",
+        "text": "Transaction requires manual review.\n\nTransaction ID: {{ $json.transaction_id }}\nAmount: ${{ $json.amount }}\nRisk Score: {{ $json.risk_score }}\nRisk Factors: {{ $json.risk_factors.join(', ') }}\n\nPlease review immediately."
+      },
+      "id": "alert-compliance",
+      "name": "Alert Compliance Team",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "transactions",
+        "columns": {
+          "properties": {
+            "status": "={{ $json.decision === 'block' ? 'blocked' : 'pending_review' }}"
+          }
+        },
+        "options": {
+          "where": {
+            "conditions": [
+              {
+                "column": "transaction_id",
+                "operator": "equal",
+                "value": "={{ $json.transaction_id }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "block-transaction",
+      "name": "Block Transaction",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 400],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Risk Assessment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Risk Assessment": {
+      "main": [
+        [
+          {
+            "node": "IF Approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Approved": {
+      "main": [
+        [
+          {
+            "node": "Log Transaction",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Alert Compliance Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Transaction": {
+      "main": [
+        [
+          {
+            "node": "Process Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Payment": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Compliance Team": {
+      "main": [
+        [
+          {
+            "node": "Block Transaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Block Transaction": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "banking-automation",
+  "tags": ["banking", "fintech", "fraud-detection", "automation"]
+}

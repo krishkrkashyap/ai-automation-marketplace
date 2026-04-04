@@ -1,0 +1,207 @@
+{
+  "name": "Energy, Utilities & Environment Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "IoT Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.meter_api }}/readings",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "fetch-meters",
+      "name": "Fetch Meter Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const readings = $input.first().json.readings || [];\nconst analyzed = readings.map(r => {\n  const consumption = r.kwh || 0;\n  const baseline = r.baseline_kwh || 100;\n  const anomaly = consumption > baseline * 1.5 || consumption < baseline * 0.5;\n  return {\n    meter_id: r.meter_id,\n    consumption_kwh: consumption,\n    baseline_kwh: baseline,\n    deviation_pct: Math.round(((consumption - baseline) / baseline) * 100),\n    is_anomaly: anomaly,\n    alert_level: anomaly ? 'warning' : 'normal'\n  };\n});\nconst anomalies = analyzed.filter(r => r.is_anomaly);\nreturn { readings: analyzed, anomaly_count: anomalies.length };"
+      },
+      "id": "analyze-consumption",
+      "name": "Analyze Consumption",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "anomaly-check",
+              "leftValue": "={{ $json.anomaly_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-anomalies",
+      "name": "IF Anomalies Found",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameter": {
+        "operation": "insert",
+        "table": "energy_alerts",
+        "columns": {
+          "properties": {
+            "meter_id": "={{ $json.readings[0].meter_id }}",
+            "consumption_kwh": "={{ $json.readings[0].consumption_kwh }}",
+            "deviation_pct": "={{ $json.readings[0].deviation_pct }}",
+            "alert_level": "={{ $json.readings[0].alert_level }}",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "log-alert",
+      "name": "Log Alert",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 400],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "energy-ops",
+        "text": "⚠️ {{ $json.anomaly_count }} meter anomalies detected!\n\n{{ $json.readings.filter(r => r.is_anomaly).map(r => `• ${r.meter_id}: ${r.deviation_pct}% deviation`).join('\\n') }}",
+        "options": {}
+      },
+      "id": "slack-alert",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1250, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "energy_readings",
+        "columns": {
+          "properties": {
+            "meter_id": "={{ $json.readings[0].meter_id }}",
+            "consumption_kwh": "={{ $json.readings[0].consumption_kwh }}",
+            "recorded_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "store-reading",
+      "name": "Store Reading",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 200],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "IoT Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Meter Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Meter Data": {
+      "main": [
+        [
+          {
+            "node": "Analyze Consumption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Consumption": {
+      "main": [
+        [
+          {
+            "node": "IF Anomalies Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Anomalies Found": {
+      "main": [
+        [
+          {
+            "node": "Store Reading",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Alert": {
+      "main": [
+        [
+          {
+            "node": "Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "energy-automation",
+  "tags": ["energy", "utilities", "iot", "automation"]
+}

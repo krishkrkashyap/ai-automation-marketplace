@@ -1,0 +1,235 @@
+{
+  "name": "E-commerce Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ecommerce-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "ecommerce-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const order = $input.first().json;\nconst items = order.items || [];\nconst total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);\nconst customer = order.customer || {};\nconst analytics = {\n  order_id: order.order_id,\n  total_value: total,\n  item_count: items.length,\n  customer_tier: customer.tier || 'new',\n  customer_lifetime_value: customer.ltv || 0,\n  is_high_value: total > 500\n};\nreturn { ...order, analytics };"
+      },
+      "id": "analyze-order",
+      "name": "Analyze Order",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "value-check",
+              "leftValue": "={{ $json.analytics.is_high_value }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-value",
+      "name": "IF High Value Order",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "name": "Create Shopify Order",
+        "properties": {
+          "fields": {
+            "properties": {
+              "email": "={{ $json.customer.email }}",
+              "line_items": "={{ $json.items }}",
+              "financial_status": "paid"
+            }
+          }
+        }
+      },
+      "id": "create-order",
+      "name": "Create Order in Shopify",
+      "type": "n8n-nodes-base.shopify",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "credentials": {
+        "shopifyApi": {
+          "id": "shopify-cred",
+          "name": "Shopify API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "inventoryItemId": "{{ $json.inventory_id }}",
+        "locationId": "{{ $json.location_id }}",
+        "available": "{{ $json.new_quantity }}",
+        "options": {}
+      },
+      "id": "update-inventory",
+      "name": "Update Inventory",
+      "type": "n8n-nodes-base.shopify",
+      "typeVersion": 1,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "template": "order-confirmation",
+        "to": "{{ $json.customer.email }}",
+        "subject": "Order Confirmation #{{ $json.order_id }}",
+        "text": "Thank you for your order!\n\nOrder ID: {{ $json.order_id }}\nTotal: ${{ $json.analytics.total_value }}\nItems: {{ $json.analytics.item_count }}\n\nWe'll notify you when it ships!"
+      },
+      "id": "send-confirmation",
+      "name": "Send Order Confirmation",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 200],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "vip-order-notification",
+        "to": "{{ $json.manager_email }}",
+        "subject": "🔥 High Value Order: ${{ $json.analytics.total_value }}",
+        "text": "High value order received!\n\nOrder ID: {{ $json.order_id }}\nCustomer: {{ $json.customer.name }}\nTotal: ${{ $json.analytics.total_value }}\n\nConsider personal follow-up."
+      },
+      "id": "notify-manager",
+      "name": "Notify Sales Manager",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Analyze Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Order": {
+      "main": [
+        [
+          {
+            "node": "IF High Value Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF High Value Order": {
+      "main": [
+        [
+          {
+            "node": "Create Order in Shopify",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Order in Shopify": {
+      "main": [
+        [
+          {
+            "node": "Send Order Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Inventory": {
+      "main": [
+        [
+          {
+            "node": "Send Order Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Order Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Notify Sales Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Sales Manager": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "ecommerce-automation",
+  "tags": ["ecommerce", "shopify", "orders", "automation"]
+}

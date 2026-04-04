@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Bots | AI Automation Marketplace{% endblock %}
+
+{% block meta_description %}Explore our AI automation bots including lead qualification, customer support, invoice processing, and more.{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero-gradient text-white py-20 relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-10 left-10 text-6xl opacity-20 animate-float">🤖</div>
+        <div class="absolute bottom-10 right-20 text-5xl opacity-20 animate-float-delayed">⚙️</div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 scroll-fade-up">AI <span class="gradient-text">Bots</span></h1>
+        <p class="text-xl text-blue-100 max-w-2xl mx-auto scroll-fade-up delay-100">Intelligent automation bots to handle your business processes 24/7.</p>
+    </div>
+</section>
+
+<!-- Bots Grid -->
+<section class="py-20 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for bot in bots %}
+            <a href="{{ bot.url }}" class="group bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 hover-lift scroll-scale" style="animation-delay: {{ forloop.counter0 }}50ms">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" style="background-color: var(--primary-color)">
+                    <i class="fas fa-robot text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-brand transition-colors" style="color: var(--primary-color)">{{ bot.name }}</h3>
+                <p class="text-gray-600 dark:text-gray-300">{{ bot.description }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

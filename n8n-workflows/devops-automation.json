@@ -1,0 +1,260 @@
+{
+  "name": "IT & DevOps Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "events": ["push"],
+        "options": {}
+      },
+      "id": "github-trigger",
+      "name": "GitHub Webhook Trigger",
+      "type": "n8n-nodes-base.ithub",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "devops-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const branch = $input.first().json.ref;\nconst commits = $input.first().json.commits || [];\nconst author = commits[0]?.author?.name || 'Unknown';\nconst message = commits[0]?.message || 'No message';\nreturn {\n  branch: branch.replace('refs/heads/', ''),\n  author: author,\n  commit_message: message,\n  repository: $input.first().json.repository?.full_name || 'unknown',\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "parse-commit",
+      "name": "Parse Commit Info",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "command": "npm install && npm run build",
+        "workingDirectory": "/app",
+        "options": {}
+      },
+      "id": "install-build",
+      "name": "Install & Build",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "build-status",
+              "leftValue": "={{ $json.exitCode }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "eq"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-build",
+      "name": "IF Build Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/{{ $json.repository }}/deployments",
+        "method": "POST",
+        "bodyParameters": {
+          "parameters": {
+            "ref": "{{ $json.branch }}",
+            "environment": "production"
+          }
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "create-deployment",
+      "name": "Create Deployment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 200],
+      "credentials": {
+        "githubApi": {
+          "id": "github-cred",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "devops",
+        "text": "✅ Deployment started for `{{ $json.branch }}`\nAuthor: {{ $json.author }}\nMessage: {{ $json.commit_message }}",
+        "options": {}
+      },
+      "id": "notify-slack",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1250, 200],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "build-failure",
+        "to": "{{ $json.notifications_email }}",
+        "subject": "❌ Build Failed: {{ $json.repository }}",
+        "text": "Build failed on branch {{ $json.branch }}\n\nAuthor: {{ $json.author }}\nMessage: {{ $json.commit_message }}\n\nPlease check the build logs."
+      },
+      "id": "notify-failure",
+      "name": "Notify Build Failure",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "devops",
+        "text": "❌ Build failed for `{{ $json.branch }}`\nAuthor: {{ $json.author }}\nMessage: {{ $json.commit_message }}",
+        "options": {}
+      },
+      "id": "slack-failure",
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1250, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "GitHub Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Commit Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Commit Info": {
+      "main": [
+        [
+          {
+            "node": "Install & Build",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Install & Build": {
+      "main": [
+        [
+          {
+            "node": "IF Build Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Build Success": {
+      "main": [
+        [
+          {
+            "node": "Create Deployment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Build Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Deployment": {
+      "main": [
+        [
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Slack": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Build Failure": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Notification": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "devops-automation",
+  "tags": ["devops", "ci/cd", "github", "automation"]
+}

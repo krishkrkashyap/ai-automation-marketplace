@@ -1,0 +1,207 @@
+{
+  "name": "Security, Risk & Fraud Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Security Monitor Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.siem_api }}/events",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "fetch-events",
+      "name": "Fetch Security Events",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const events = $input.first().json.events || [];\nconst analyzed = events.map(event => {\n  const severityMap = { 'critical': 100, 'high': 75, 'medium': 50, 'low': 25 };\n  const severity = severityMap[event.severity] || 25;\n  const indicators = [];\n  if (event.src_ip?.includes('.')) indicators.push('suspicious_ip');\n  if (event.action === 'failed_login') indicators.push('brute_force');\n  if (event.bytes_out > 1000000) indicators.push('data_exfiltration');\n  return {\n    event_id: event.id,\n    severity_score: severity,\n    indicators: indicators,\n    is_threat: severity > 75 || indicators.length > 1,\n    action_required: severity > 50 ? 'investigate' : 'log_only'\n  };\n});\nconst threats = analyzed.filter(e => e.is_threat);\nreturn { events: analyzed, threat_count: threats.length, critical_count: threats.filter(t => t.severity_score >= 100).length };"
+      },
+      "id": "analyze-threats",
+      "name": "AI Threat Analysis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "threat-check",
+              "leftValue": "={{ $json.threat_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-threats",
+      "name": "IF Threats Detected",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "security_incidents",
+        "columns": {
+          "properties": {
+            "event_id": "={{ $json.events[0].event_id }}",
+            "severity": "={{ $json.events[0].severity_score }}",
+            "indicators": "={{ JSON.stringify($json.events[0].indicators) }}",
+            "status": "open",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "create-incident",
+      "name": "Create Incident",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 400],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "security-alerts",
+        "text": "🚨 SECURITY ALERT: {{ $json.threat_count }} threats detected!\n\n{{ $json.events.filter(e => e.is_threat).map(e => `• ${e.event_id}: ${e.severity_score} severity`).join('\\n') }}",
+        "options": {}
+      },
+      "id": "slack-alert",
+      "name": "Slack Security Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1250, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "security_logs",
+        "columns": {
+          "properties": {
+            "event_count": "={{ $json.events.length }}",
+            "threat_count": "={{ $json.threat_count }}",
+            "logged_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "log-events",
+      "name": "Log Events",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 200],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Security Monitor Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Security Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Security Events": {
+      "main": [
+        [
+          {
+            "node": "AI Threat Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Threat Analysis": {
+      "main": [
+        [
+          {
+            "node": "IF Threats Detected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Threats Detected": {
+      "main": [
+        [
+          {
+            "node": "Log Events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Incident",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Incident": {
+      "main": [
+        [
+          {
+            "node": "Slack Security Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "security-automation",
+  "tags": ["security", "fraud", "siem", "automation"]
+}

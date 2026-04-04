@@ -1,0 +1,174 @@
+{
+  "name": "Customer Support Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-ticket",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "support-ticket-001"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "projectId": "support-project",
+        "title": "New Ticket: {{ $json.subject }}",
+        "body": "From: {{ $json.email }}\n\n{{ $json.message }}",
+        "labels": ["{{ $json.category }}", "new"]
+      },
+      "id": "create-ticket",
+      "name": "Create Ticket",
+      "type": "n8n-nodes-base.linear",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "linearApi": {
+          "id": "linear-cred",
+          "name": "Linear API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "C0123456789",
+        "text": "🎫 New Support Ticket\n\nFrom: {{ $json.email }}\nSubject: {{ $json.subject }}\nPriority: {{ $json.priority }}",
+        "otherOptions": {}
+      },
+      "id": "slack-alert",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [650, 200],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.priority }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "check-priority",
+      "name": "IF High Priority",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "to": "{{ $json.email }}",
+        "subject": "Support Ticket Received: {{ $json.subject }}",
+        "text": "Thank you for contacting support. Your ticket has been received and we'll respond within 24 hours.\n\nTicket ID: {{ $('Create Ticket').item.json.id }}"
+      },
+      "id": "auto-reply",
+      "name": "Auto Reply",
+      "type": "n8n-nodes-base.sendEmail",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Ticket": {
+      "main": [
+        [
+          {
+            "node": "Slack Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF High Priority",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF High Priority": {
+      "main": [
+        [
+          {
+            "node": "Auto Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Alert": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto Reply": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "customer-support-automation",
+  "tags": ["support", "tickets", "automation"]
+}

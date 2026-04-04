@@ -1,0 +1,151 @@
+{
+  "name": "Media & Creative Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.cms_api }}/content",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "fetch-content",
+      "name": "Fetch Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.first().json.items || [];\nconst processed = items.map(item => {\n  const tags = item.content.toLowerCase().split(/\\s+/).filter(w => \n    ['ai', 'tech', 'news', 'product', 'review'].includes(w)\n  );\n  return {\n    ...item,\n    suggested_tags: tags,\n    word_count: item.content.split(/\\s+/).length,\n    needs_seo: item.content.length < 300\n  };\n});\nreturn { items: processed, count: processed.length };"
+      },
+      "id": "process-content",
+      "name": "Process Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "content",
+        "columns": {
+          "properties": {
+            "suggested_tags": "={{ JSON.stringify($json.items[0].suggested_tags) }}",
+            "word_count": "={{ $json.items[0].word_count }}",
+            "needs_seo": "={{ $json.items[0].needs_seo }}",
+            "updated_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {
+          "where": {
+            "conditions": [
+              {
+                "column": "id",
+                "operator": "equal",
+                "value": "={{ $json.items[0].id }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "update-cms",
+      "name": "Update CMS",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "content-team",
+        "text": "✅ Processed {{ $json.count }} content items",
+        "options": {}
+      },
+      "id": "notify-team",
+      "name": "Notify Team",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Content": {
+      "main": [
+        [
+          {
+            "node": "Process Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Content": {
+      "main": [
+        [
+          {
+            "node": "Update CMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update CMS": {
+      "main": [
+        [
+          {
+            "node": "Notify Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "media-automation",
+  "tags": ["media", "content", "cms", "automation"]
+}

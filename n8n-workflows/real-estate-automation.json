@@ -1,0 +1,173 @@
+{
+  "name": "Real Estate Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "real-estate-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "realestate-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $input.first().json;\nconst budget = parseFloat(lead.budget) || 0;\nconst scores = { budget_match: budget >= lead.min_budget && budget <= lead.max_budget ? 20 : 0 };\nscores.location_match = lead.preferred_locations?.includes(lead.property_location) ? 20 : 0;\nscores.timeline_match = lead.timeline_months <= 3 ? 15 : lead.timeline_months <= 6 ? 10 : 5;\nconst totalScore = Object.values(scores).reduce((a, b) => a + b, 0);\nreturn {\n  lead_id: lead.lead_id,\n  name: lead.name,\n  email: lead.email,\n  phone: lead.phone,\n  budget: budget,\n  fit_score: totalScore,\n  status: totalScore >= 50 ? 'qualified' : 'nurture',\n  recommendation: totalScore >= 70 ? 'hot' : totalScore >= 50 ? 'warm' : 'cold'\n};"
+      },
+      "id": "qualify-lead",
+      "name": "Qualify Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseQualified": true
+          },
+          "conditions": [
+            {
+              "id": "status-check",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "qualified",
+              "operator": {
+                "type": "string",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-status",
+      "name": "IF Qualified",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "template": "property-match",
+        "to": "{{ $json.email }}",
+        "subject": "We Found Properties For You!",
+        "text": "Hi {{ $json.name }},\n\nBased on your requirements, we've found matching properties!\n\nYour Budget: ${{ $json.budget }}\nFit Score: {{ $json.fit_score }}\n\nBrowse our available properties at: https://example.com/properties\n\nBest regards,\nReal Estate Team"
+      },
+      "id": "send-matches",
+      "name": "Send Property Matches",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 200],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "new-lead-alert",
+        "to": "{{ $json.agent_email }}",
+        "subject": "🔥 New {{ $json.recommendation }} Lead: {{ $json.name }}",
+        "text": "New lead qualified!\n\nName: {{ $json.name }}\nBudget: ${{ $json.budget }}\nScore: {{ $json.fit_score }}\nStatus: {{ $json.status }}\n\nContact: {{ $json.phone }}"
+      },
+      "id": "alert-agent",
+      "name": "Alert Agent",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Qualify Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualify Lead": {
+      "main": [
+        [
+          {
+            "node": "IF Qualified",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Qualified": {
+      "main": [
+        [
+          {
+            "node": "Send Property Matches",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Alert Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Property Matches": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "real-estate-automation",
+  "tags": ["real-estate", "leads", "crm", "automation"]
+}

@@ -1,0 +1,233 @@
+{
+  "name": "Manufacturing & Industrial Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "IoT Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.iot_api_url }}/sensors",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "fetch-sensors",
+      "name": "Fetch Sensor Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const sensors = $input.first().json.sensors || [];\nconst readings = sensors.map(sensor => {\n  const temp = sensor.temperature || 0;\n  const vibration = sensor.vibration || 0;\n  const hours = sensor.operating_hours || 0;\n  const failure_risk = (\n    (temp > 80 ? 0.3 : 0) +\n    (vibration > 5 ? 0.3 : 0) +\n    (hours > 1000 ? 0.2 : 0) +\n    (temp > 90 ? 0.2 : 0)\n  );\n  return {\n    sensor_id: sensor.id,\n    temperature: temp,\n    vibration: vibration,\n    operating_hours: hours,\n    failure_risk: Math.min(1, failure_risk),\n    needs_maintenance: failure_risk > 0.5,\n    status: failure_risk > 0.7 ? 'critical' : failure_risk > 0.5 ? 'warning' : 'normal'\n  };\n});\nconst critical = readings.filter(r => r.status === 'critical');\nconst warnings = readings.filter(r => r.status === 'warning');\nreturn { readings, critical_count: critical.length, warning_count: warnings.length };"
+      },
+      "id": "analyze-sensors",
+      "name": "Analyze Sensor Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "id": "critical-check",
+              "leftValue": "={{ $json.critical_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-critical",
+      "name": "IF Critical Alert",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "maintenance_alerts",
+        "columns": {
+          "properties": {
+            "sensor_id": "={{ $json.readings[0].sensor_id }}",
+            "alert_type": "critical",
+            "failure_risk": "={{ $json.readings[0].failure_risk }}",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "log-critical",
+      "name": "Log Critical Alert",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 200],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "manufacturing-alerts",
+        "text": "🚨 CRITICAL: {{ $json.critical_count }} sensors need immediate attention!\n\n{{ $json.readings.filter(r => r.status === 'critical').map(r => `• ${r.sensor_id}: ${Math.round(r.failure_risk * 100)}% failure risk`).join('\\n') }}",
+        "options": {}
+      },
+      "id": "alert-slack",
+      "name": "Alert via Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1250, 200],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "calendarId": "primary",
+        "eventTitle": "Maintenance Required: {{ $json.readings[0].sensor_id }}",
+        "eventDescription": "Critical maintenance needed.\n\nFailure Risk: {{ Math.round($json.readings[0].failure_risk * 100) }}%\nTemperature: {{ $json.readings[0].temperature }}°C\nVibration: {{ $json.readings[0].vibration }}",
+        "eventStart": "{{ $json.maintenance_date }}T08:00:00",
+        "eventEnd": "{{ $json.maintenance_date }}T10:00:00"
+      },
+      "id": "schedule-maintenance",
+      "name": "Schedule Maintenance",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 3,
+      "position": [1450, 200],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "google-cred",
+          "name": "Google Calendar"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "maintenance-report",
+        "to": "{{ $json.ops_email }}",
+        "subject": "📊 IoT Monitoring Report - {{ $json.critical_count }} Critical, {{ $json.warning_count }} Warning",
+        "text": "IoT Sensor Monitoring Report\n\nCritical: {{ $json.critical_count }}\nWarning: {{ $json.warning_count }}\nNormal: {{ $json.readings.length - $json.critical_count - $json.warning_count }}\n\nTotal Sensors Monitored: {{ $json.readings.length }}"
+      },
+      "id": "send-report",
+      "name": "Send Daily Report",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 400],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "IoT Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Sensor Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Sensor Data": {
+      "main": [
+        [
+          {
+            "node": "Analyze Sensor Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Sensor Data": {
+      "main": [
+        [
+          {
+            "node": "IF Critical Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Critical Alert": {
+      "main": [
+        [
+          {
+            "node": "Log Critical Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Daily Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Critical Alert": {
+      "main": [
+        [
+          {
+            "node": "Alert via Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert via Slack": {
+      "main": [
+        [
+          {
+            "node": "Schedule Maintenance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "manufacturing-automation",
+  "tags": ["manufacturing", "iot", "predictive-maintenance", "automation"]
+}

@@ -1,0 +1,138 @@
+{
+  "name": "No-Code / Low-Code Automation Services",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nocode-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "nocode-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const request = $input.first().json;\nconst platforms = {\n  'zapier': { complexity: 'low', nodes: 5000, price: '$20/mo' },\n  'make': { complexity: 'low', nodes: 5500, price: '$9/mo' },\n  'power-automate': { complexity: 'medium', nodes: 1000, price: '$12/mo' },\n  'n8n': { complexity: 'medium', nodes: 400, price: '$20/self-hosted' }\n};\nconst selected = platforms[request.platform] || platforms['zapier'];\nconst workflow = {\n  platform: request.platform,\n  description: request.description,\n  complexity: selected.complexity,\n  estimated_nodes: selected.nodes,\n  price_estimate: selected.price,\n  timeline_hours: selected.complexity === 'low' ? 4 : 8\n};\nreturn workflow;"
+      },
+      "id": "recommend-platform",
+      "name": "Recommend Platform",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "automation_requests",
+        "columns": {
+          "properties": {
+            "platform": "={{ $json.platform }}",
+            "description": "={{ $json.description }}",
+            "complexity": "={{ $json.complexity }}",
+            "status": "requested",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "save-request",
+      "name": "Save Request",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "platform-recommendation",
+        "to": "{{ $json.email }}",
+        "subject": "Your No-Code Automation Solution: {{ $json.platform }}",
+        "text": "We've analyzed your requirements and recommend {{ $json.platform }}.\n\nComplexity: {{ $json.complexity }}\nEstimated Timeline: {{ $json.timeline_hours }} hours\nPrice: {{ $json.price_estimate }}\n\nWe'll be in touch to discuss implementation."
+      },
+      "id": "send-recommendation",
+      "name": "Send Recommendation",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Recommend Platform",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recommend Platform": {
+      "main": [
+        [
+          {
+            "node": "Save Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Request": {
+      "main": [
+        [
+          {
+            "node": "Send Recommendation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Recommendation": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "nocode-automation",
+  "tags": ["nocode", "lowcode", "zapier", "automation"]
+}

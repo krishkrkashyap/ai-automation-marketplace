@@ -1,0 +1,190 @@
+{
+  "name": "Logistics & Supply Chain Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "logistics-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "logistics-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const shipment = $input.first().json;\nconst stops = shipment.stops || [];\nconst distances = stops.map((stop, i) => {\n  if (i === 0) return 0;\n  const prev = stops[i-1];\n  const curr = stop;\n  return Math.sqrt(Math.pow(curr.lat - prev.lat, 2) + Math.pow(curr.lng - prev.lng, 2)) * 111;\n});\nconst totalDistance = distances.reduce((a, b) => a + b, 0);\nconst optimizedStops = [...stops].sort((a, b) => {\n  return (a.priority || 0) - (b.priority || 0);\n});\nreturn { \n  shipment_id: shipment.shipment_id,\n  stops: optimizedStops,\n  total_distance_km: Math.round(totalDistance),\n  estimated_duration_hours: Math.round(totalDistance / 60 + stops.length * 0.5),\n  vehicle_type: shipment.vehicle_type || 'truck',\n  priority: shipment.priority || 'normal'\n};"
+      },
+      "id": "optimize-route",
+      "name": "Route Optimization",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.mapbox.com/directions/driving/{{ $json.stops.map(s => s.lng + ',' + s.lat).join(';') }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "get-directions",
+      "name": "Get MapBox Directions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [650, 300],
+      "credentials": {
+        "mapboxApi": {
+          "id": "mapbox-cred",
+          "name": "MapBox API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const directions = $input.first().json.routes?.[0] || {};\nconst route = {\n  distance_km: Math.round(directions.distance / 1000),\n  duration_minutes: Math.round(directions.duration / 60),\n  geometry: directions.geometry,\n  waypoints: (directions.waypoints || []).map(w => w.name)\n};\nconst result = { \n  ...$input.first().json,\n  optimized_route: route,\n  cost_per_km: 2.5,\n  estimated_cost: Math.round(route.distance_km * 2.5)\n};\nreturn result;"
+      },
+      "id": "calculate-cost",
+      "name": "Calculate Shipping Cost",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "table": "shipments",
+        "columns": {
+          "properties": {
+            "shipment_id": "={{ $json.shipment_id }}",
+            "total_distance_km": "={{ $json.total_distance_km }}",
+            "estimated_duration_hours": "={{ $json.estimated_duration_hours }}",
+            "estimated_cost": "={{ $json.estimated_cost }}",
+            "status": "optimized",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "save-shipment",
+      "name": "Save Shipment",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "shipment-optimized",
+        "to": "{{ $json.customer_email }}",
+        "subject": "📦 Shipment Optimized: {{ $json.shipment_id }}",
+        "text": "Your shipment has been optimized.\n\nShipment ID: {{ $json.shipment_id }}\nDistance: {{ $json.optimized_route.distance_km }} km\nEstimated Time: {{ $json.optimized_route.duration_minutes }} minutes\nEstimated Cost: ${{ $json.estimated_cost }}"
+      },
+      "id": "notify-customer",
+      "name": "Notify Customer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1250, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Route Optimization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Optimization": {
+      "main": [
+        [
+          {
+            "node": "Get MapBox Directions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get MapBox Directions": {
+      "main": [
+        [
+          {
+            "node": "Calculate Shipping Cost",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Shipping Cost": {
+      "main": [
+        [
+          {
+            "node": "Save Shipment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Shipment": {
+      "main": [
+        [
+          {
+            "node": "Notify Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Customer": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "logistics-automation",
+  "tags": ["logistics", "supply-chain", "route-optimization", "automation"]
+}

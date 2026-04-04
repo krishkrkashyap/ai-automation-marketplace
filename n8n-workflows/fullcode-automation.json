@@ -1,0 +1,163 @@
+{
+  "name": "Full-Code / Custom Automation Services",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fullcode-automation",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "fullcode-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const request = $input.first().json;\nconst projectType = request.project_type || 'custom';\nconst complexityMap = {\n  'simple': { hours: 40, price: 5000, tech_stack: ['Python', 'FastAPI', 'PostgreSQL'] },\n  'medium': { hours: 80, price: 12000, tech_stack: ['Python', 'FastAPI', 'React', 'PostgreSQL', 'Docker'] },\n  'complex': { hours: 160, price: 25000, tech_stack: ['Python', 'FastAPI', 'React', 'PostgreSQL', 'Docker', 'Kubernetes', 'AWS'] },\n  'enterprise': { hours: 300, price: 50000, tech_stack: ['Python', 'FastAPI', 'LangChain', 'React', 'K8s', 'AWS', 'GCP'] }\n};\nconst complexity = complexityMap[request.complexity] || complexityMap['medium'];\nreturn {\n  project_name: request.project_name,\n  project_type: projectType,\n  complexity: request.complexity || 'medium',\n  estimated_hours: complexity.hours,\n  price_estimate: complexity.price,\n  tech_stack: complexity.tech_stack,\n  features: request.features || [],\n  status: 'proposal_generated'\n};"
+      },
+      "id": "analyze-requirements",
+      "name": "Analyze Requirements",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "custom_projects",
+        "columns": {
+          "properties": {
+            "project_name": "={{ $json.project_name }}",
+            "complexity": "={{ $json.complexity }}",
+            "estimated_hours": "={{ $json.estimated_hours }}",
+            "price_estimate": "={{ $json.price_estimate }}",
+            "tech_stack": "={{ JSON.stringify($json.tech_stack) }}",
+            "status": "={{ $json.status }}",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "save-project",
+      "name": "Save Project",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-cred",
+          "name": "PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "template": "custom-proposal",
+        "to": "{{ $json.email }}",
+        "subject": "Your Custom Automation Proposal: {{ $json.project_name }}",
+        "text": "Thank you for your interest in custom automation!\n\nProject: {{ $json.project_name }}\nComplexity: {{ $json.complexity }}\nEstimated Hours: {{ $json.estimated_hours }}\nPrice: ${{ $json.price_estimate }}\n\nTech Stack:\n{{ $json.tech_stack.join('\\n') }}\n\nWe'll contact you to discuss the implementation plan."
+      },
+      "id": "send-proposal",
+      "name": "Send Proposal",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-cred",
+          "name": "Email SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "sales",
+        "text": "📋 New Custom Project: {{ $json.project_name }}\n\nComplexity: {{ $json.complexity }}\nPrice: ${{ $json.price_estimate }}\nContact: {{ $json.email }}",
+        "options": {}
+      },
+      "id": "notify-sales",
+      "name": "Notify Sales",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [850, 500],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-cred",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Analyze Requirements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Requirements": {
+      "main": [
+        [
+          {
+            "node": "Save Project",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Project": {
+      "main": [
+        [
+          {
+            "node": "Send Proposal",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Sales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Proposal": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "fullcode-automation",
+  "tags": ["fullcode", "custom", "development", "automation"]
+}
