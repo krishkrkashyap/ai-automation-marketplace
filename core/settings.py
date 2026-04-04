@@ -2,15 +2,29 @@
 Django settings for core project.
 """
 
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-6vgo(qs=&e)y8ag+*g1!3y)eewdpwmolisp-xnq3z9)ee&34z#'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-6vgo(qs=&e)y8ag+*g1!3y)eewdpwmolisp-xnq3z9)ee&34z#')
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
+
+if os.environ.get('DATABASE_URL'):
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 INSTALLED_APPS = [
     'django.contrib.admin',
